@@ -1,4 +1,7 @@
+#include "FrostbiteSDK.h"
+#include "Util.h"
 #include "CustomOcclusionQueryManager.h"
+#include <math.h>
 
 t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery 			fb__WorldOcclusionQueryRenderModule__drawBatchQuery = 			(t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)			0x141DDAFC0; //4C 8B CD 4C 8B C7 48 8B D6 49 8B CE E8 ?? ?? ?? ?? EB 10
 t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData 		fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData = 	(t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData)	0x1491CB270; //pattern from above minus two
