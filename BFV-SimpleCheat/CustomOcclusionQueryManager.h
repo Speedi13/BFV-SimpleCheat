@@ -27,6 +27,7 @@ public:
 	bool CustomOcclusionQueryManager::IsInQuery( void* entity );
 	CustomOcclusionQueryManager::OcclusionQuery* CustomOcclusionQueryManager::GetQuery( void* entity );
 	CustomOcclusionQueryManager::OcclusionQuery* CustomOcclusionQueryManager::AddQuery( void* entity, fb::WorldOcclusionQueryRenderModule::ObjectRenderInfo* info );
+	bool CustomOcclusionQueryManager::RemoveQuery( void* entity );
 	
 	static CustomOcclusionQueryManager* GetInstance()
 	{
@@ -63,6 +64,6 @@ typedef unsigned __int64 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__ins
 																										float *outObjectScreenAreaCoverage );
 
 extern t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery 			fb__WorldOcclusionQueryRenderModule__drawBatchQuery;
-extern t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData 	fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData;
+extern t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData 		fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData;
 extern t_fb__WorldOcclusionQueryRenderModule__processBatchQueries 		fb__WorldOcclusionQueryRenderModule__processBatchQueries;
 extern t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery 			fb__WorldOcclusionQueryRenderModule__insertBatchQuery;
