@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="CustomOcclusionQueryManager">
+      <UniqueIdentifier>{2d008101-77d6-47d1-b5b7-d42ee36f3ff7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FrostbiteSDK">
+      <UniqueIdentifier>{46553a58-0ce4-43ef-bb13-1314f0c823f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ESP">
+      <UniqueIdentifier>{11536eff-35f2-4378-ae23-a0598ec758b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ObfuscationMgr">
+      <UniqueIdentifier>{95dccb39-3e84-41cf-b7e4-4d236843fa10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomOcclusionQueryManager.cpp">
+      <Filter>CustomOcclusionQueryManager</Filter>
+    </ClCompile>
+    <ClCompile Include="FrostbiteSDK.cpp">
+      <Filter>FrostbiteSDK</Filter>
+    </ClCompile>
+    <ClCompile Include="ESP.cpp">
+      <Filter>ESP</Filter>
+    </ClCompile>
+    <ClCompile Include="FrostbiteSDK.h">
+      <Filter>FrostbiteSDK</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="ObfuscationMgr.cpp">
+      <Filter>ObfuscationMgr</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Util.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomOcclusionQueryManager.h">
+      <Filter>CustomOcclusionQueryManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ESP.h">
+      <Filter>ESP</Filter>
+    </ClInclude>
+    <ClInclude Include="ObfuscationMgr.h">
+      <Filter>ObfuscationMgr</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
