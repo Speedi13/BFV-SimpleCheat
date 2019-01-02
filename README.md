@@ -8,7 +8,7 @@ This is a demo cheat for people to learn the basics,<br />
 it doesn't contain any protection against the games anti-cheat<br />
 
 # CustomOcclusionQueryManager
-![Demo video](https://i.imgur.com/HOBbVYt.mp4)
+https://i.imgur.com/HOBbVYt.mp4
 
 # Screenshots
 ![Demo pic 1](https://raw.githubusercontent.com/Speedi13/BFV-SimpleCheat/master/Screenshots/ESP.png)
