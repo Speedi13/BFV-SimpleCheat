@@ -209,7 +209,7 @@ TRY_END;
 				float fl0X200 = .0f; //mulss   xmm13, dword ptr [rdi+rbx+200h]
 				*(DWORD*)&fl0X200 = 0x4002F531; //2.046215296
 
-				//inside fb::SoldierOcclusionQueryManager::updateBatchedOcclusionQueries
+				//https://github.com/Speedi13/BFV-OcclusionQueryManager/blob/master/Reversed_Occlusion_functions.h#L78
 				//fl0X200 = sub_141792B90(off_1443A9830, LocalPlayerId, 0);
 			
 				float flVisibility = this->m_ObjectScreenAreaCoverage[i*32 + u ];
