@@ -173,7 +173,6 @@ TRY_END;
 
 			pBatch->count = CurrentQuery+1;
 			pBatch->doneCounter = 0;
-			pBatch->queriesInitialized = 0;
 			pBatch->dwordC = 0;
 			pBatch->status = fb::WorldOcclusionQueryRenderModule::BatchQuery::QS_Init;
 			pBatch->outObjectScreenAreaCoverage = &this->m_ObjectScreenAreaCoverage[CurrentBatch*32];
@@ -190,10 +189,13 @@ TRY_END;
 			for (int j = 0; j < CurrentBatch+1; j++)
 			{
 				fb::WorldOcclusionQueryRenderModule::BatchQuery* pBatch = &this->m_Batches[j];
-				fb::DxRenderQuery* pDxRenderQuery = (fb::DxRenderQuery*)pDxRenderer->createQuery( pWorldOcclusionQueryRenderModule->m_Allocator, fb::RenderQueryType_Occlusion, 32, "worldRenderOcclusion" );
-				pBatch->m_dxQuerys = pDxRenderQuery;
-				(*(void (__fastcall **)(fb::DxRenderQuery *))pDxRenderQuery->vtable)(pDxRenderQuery); //<< just _InterlockedIncrement
-				pBatch->queriesInitialized = 1;
+				if ( pBatch->queriesInitialized != 1 || !ValidPointer(pBatch->m_dxQuerys))
+				{
+					fb::DxRenderQuery* pDxRenderQuery = (fb::DxRenderQuery*)pDxRenderer->createQuery( pWorldOcclusionQueryRenderModule->m_Allocator, fb::RenderQueryType_Occlusion, 32, "worldRenderOcclusion" );
+					pBatch->m_dxQuerys = pDxRenderQuery;
+					(*(void (__fastcall **)(fb::DxRenderQuery *))pDxRenderQuery->vtable)(pDxRenderQuery); //<< just _InterlockedIncrement
+					pBatch->queriesInitialized = 1;
+				}
 				fb__WorldOcclusionQueryRenderModule__drawBatchQuery( pWorldOcclusionQueryRenderModule, Qword, RootViewDesc, pBatch );
 			}
 		}
@@ -204,7 +206,6 @@ TRY_END;
 		{
 			fb::WorldOcclusionQueryRenderModule::BatchQuery* pBatch = &this->m_Batches[x];
 			pBatch->count = 0;
-			pBatch->queriesInitialized = 0;
 			pBatch->status = fb::WorldOcclusionQueryRenderModule::BatchQuery::QS_Inactive;
 		}
 		bQueryActive = true;
@@ -250,7 +251,6 @@ TRY_END;
 			}
 			pBatch->count = NULL;
 			pBatch->status = fb::WorldOcclusionQueryRenderModule::BatchQuery::QS_Inactive;
-			pBatch->queriesInitialized = 0;
 		}
 		bQueryActive = false;
 	};
