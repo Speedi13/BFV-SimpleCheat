@@ -4,26 +4,26 @@
 //for latest offsets check the last page of this thread:
 //https://www.unknowncheats.me/forum/battlefield-v/288137-battlefield-reversing-struct-offsets-thread.html
 
-#define OFFSET_CLIENTGAMECONTEXT 0x1443FEC80
-#define OFFSET_DXRENDERER 0x144443D50
-#define OFFSET_GAMERENDERER 0x144444790
-#define OFFSET_ObfuscationMgr 0x1440BBA90
+#define OFFSET_CLIENTGAMECONTEXT 0x144449a50
+#define OFFSET_DXRENDERER 0x144496600
+#define OFFSET_GAMERENDERER 0x144497090
+#define OFFSET_ObfuscationMgr 0x14410D050
 
-#define OFFSET_DEBUGRENDERER     0x145269AA0 //48 8B 0D ?? ?? ?? ?? 48 85 C9 75 03 31 C0 C3 E9]
-#define OFFSET_DrawText          0x1403CD290 //4C 8B C8 44 8B C6 BA 14 00 00 00 49 8B CC E8] + 15
-#define OFFSET_DrawLine          0x1403CCD50 //49 8B CC E8 ?? ?? ?? ?? FF ?? 8B 0D] + 4
-#define OFFSET_DrawRect2D        0x1403CCF50 //48 8B 46 60 48 2B 46 58 48 C1 F8 05 85 C0] - 18
+#define OFFSET_DEBUGRENDERER     0x1453B4200 //48 8B 0D ?? ?? ?? ?? 48 85 C9 75 03 31 C0 C3 E9]
+#define OFFSET_DrawText          0x1403D2280 //4C 8B C8 44 8B C6 BA 14 00 00 00 49 8B CC E8] + 15
+#define OFFSET_DrawLine          0x1403D1D40 //49 8B CC E8 ?? ?? ?? ?? FF ?? 8B 0D] + 4
+#define OFFSET_DrawRect2D        0x1403D1F40 //C7 44 24 3C 00 00 F0 41 41 83 C9 FF 4C 8D] + 25
 
 #define ValidPointer( pointer ) ( pointer != NULL && (DWORD_PTR)pointer >= 0x10000 && (DWORD_PTR)pointer < 0x000F000000000000 /*&& some other checks*/ )
 
 extern DWORD OFFSET_Soldier;
 extern DWORD OFFSET_Vehicle;
-#define OFFSET_BoneCollisionComponent 0x0630
-#define OFFSET_HealthComponent 0x208
-#define OFFSET_occluded 0x08DB
-#define OFFSET_PredictedController 0x7C0 //https://github.com/Speedi13/BFV-Decryption/blob/master/BfvDecryptionDemo/DllMain.cpp#L22
-#define OFFSET_Player_TeamId 0x1C3C
-#define OFFSET_Soldier_TeamId 0x154
+#define OFFSET_BoneCollisionComponent 0x0670
+#define OFFSET_HealthComponent 0x208+0x30
+#define OFFSET_occluded 0x91B
+#define OFFSET_PredictedController 0x800 //https://github.com/Speedi13/BFV-Decryption/blob/master/BfvDecryptionDemo/DllMain.cpp#L22
+#define OFFSET_Player_TeamId 0x1C48
+#define OFFSET_Soldier_TeamId 0x154+0x30
 
 #define D3DX_PI    (3.14159265358979323846)
 #define D3DX_1BYPI ( 1.0 / D3DX_PI )
