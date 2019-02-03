@@ -5,3 +5,5 @@
 
 fb::ClientPlayer* GetPlayerById( int id );
 fb::ClientPlayer* GetLocalPlayer( void );
+
+void BypassObfuscationMgr();
