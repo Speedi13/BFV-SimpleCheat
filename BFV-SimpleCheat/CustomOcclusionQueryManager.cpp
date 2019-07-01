@@ -4,10 +4,10 @@
 #include <math.h>
 #include <stdio.h>
 
-t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery 			fb__WorldOcclusionQueryRenderModule__drawBatchQuery = 			(t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)		0x141C22E70; //4C 8B CD 4C 8B C7 48 8B D6 49 8B CE E8 ?? ?? ?? ?? EB 10
-t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData 		fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData = 	(t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData)		0x141C382E0; //pattern from above minus two
-t_fb__WorldOcclusionQueryRenderModule__processBatchQueries 		fb__WorldOcclusionQueryRenderModule__processBatchQueries = 		(t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)	0x141C375D0; //00 00 C6 44 ?? ?? ?? 41 B1 01 49 8B D4 E8
-t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery 		fb__WorldOcclusionQueryRenderModule__insertBatchQuery = 		(t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery)	0x?????????; //not needed
+t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery           fb__WorldOcclusionQueryRenderModule__drawBatchQuery =           (t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)         0x14196BD70; //4C 8B CD 4C 8B C7 48 8B D6 49 8B CE E8 ?? ?? ?? ?? EB 10
+t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData   fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData =   (t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData) 0x141988510; //pattern from above minus two
+t_fb__WorldOcclusionQueryRenderModule__processBatchQueries      fb__WorldOcclusionQueryRenderModule__processBatchQueries =      (t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)    0x141987470; //00 00 C6 44 ?? ?? ?? 41 B1 01 49 8B D4 E8
+t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery         fb__WorldOcclusionQueryRenderModule__insertBatchQuery =         (t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery)	    0x?????????; //not needed
 
 unsigned __int64 __fastcall WorldOcclusionQueryRenderModule___HkProcessBatchQueries(fb::WorldOcclusionQueryRenderModule* _this, DWORD64 Qword, fb::WorldViewDesc* viewDesc, bool b )
 {
@@ -67,39 +67,41 @@ void __fastcall CustomOcclusionQueryManager::EngineUpdate()
 	//printf("function: "__FUNCTION__"\n");
 	fb::DxRenderer* pDxRenderer = fb::DxRenderer::GetInstance();
 	if (!ValidPointer(pDxRenderer)) return;
-	
+
 	fb::GameRenderer* pGameRenderer = fb::GameRenderer::GetInstance();
 	if (!ValidPointer(pGameRenderer)) return;
-	
+
 	fb::ClientGameContext* pClientGameContext = fb::ClientGameContext::GetInstance();
 	if (!ValidPointer(pClientGameContext)) return;
-	
+
 	fb::ClientLevel* pLevel = pClientGameContext->m_pClientLevel;
 	if (!ValidPointer(pLevel)) return;
-	
+
 	fb::WorldRenderModule* pWorldRenderModule = pLevel->m_worldRenderModule;
 	if (!ValidPointer(pWorldRenderModule)) return;
-	
+
 	fb::WorldRenderer* pWorldRenderer = pWorldRenderModule->m_worldRenderer;
 	if (!ValidPointer(pWorldRenderer)) return;
-	
+
 	fb::WorldOcclusionQueryRenderModule* pWorldOcclusionQueryRenderModule = pWorldRenderer->m_WorldOcclusionQueriesRenderModule;
 	if (!ValidPointer(pWorldOcclusionQueryRenderModule)) return;
-	
+
 	fb::WorldRenderer::RootView* RootView = &pWorldRenderer->m_rootviews;
 	if (!ValidPointer(RootView)) return;
-	
+
 	fb::WorldViewDesc* RootViewDesc = &RootView->m_rootView; //same as viewDesc
 	if (!ValidPointer(RootViewDesc)) return;
-	
-	float flScreenArea = RootView->m_rootView.viewport.width * RootView->m_rootView.viewport.height;
+
+	float flScreenArea = (float)RootView->m_rootView.viewport.width * RootView->m_rootView.viewport.height;
 
 	//first xref of "waitMeshStream" function one of the first instructions of the function
-	//48 8B 0D ?? ?? ?? ?? 48 8B 01 49 8B D7 FF 50 28 48 8B + 3
+	//48 8B 01 FF 50 38 C6 86 ?? ?? ?? 00 - after this pattern "mov r14, [rsi+12458h]"
 	//trackDis = *(_QWORD *)(GameRenderer + 0x12458);
 
 	QWORD Qword = *(_QWORD *)( (DWORD_PTR)pGameRenderer + 0x12458); //same as qword
 	if (!ValidPointer(Qword)) return;
+
+	this->Enter();
 
 	static DWORD idMap[256];
 	static DWORD idMapCount = NULL;
@@ -186,7 +188,7 @@ TRY_END;
 		int x = CurrentBatch+1;
 		if ( idMapCount > 0 )
 		{
-			for (int j = 0; j < CurrentBatch+1; j++)
+			for (unsigned int j = 0; j < CurrentBatch+1; j++)
 			{
 				fb::WorldOcclusionQueryRenderModule::BatchQuery* pBatch = &this->m_Batches[j];
 				if ( pBatch->queriesInitialized != 1 || !ValidPointer(pBatch->m_dxQuerys))
@@ -222,7 +224,7 @@ TRY_END;
 				)
 				continue;
 			fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData( pWorldOcclusionQueryRenderModule, pBatch, flScreenArea); //not a problem
-			for (int u = 0; u < pBatch->count; u++)
+			for (unsigned int u = 0; u < pBatch->count; u++)
 			{
 				float fl0X200 = .0f; //mulss   xmm13, dword ptr [rdi+rbx+200h]
 				*(DWORD*)&fl0X200 = 0x4002F531; //2.046215296
@@ -254,6 +256,7 @@ TRY_END;
 		}
 		bQueryActive = false;
 	};
+	this->Leave();
 }
 
 bool CustomOcclusionQueryManager::OcclusionQuery::IsVisible( )
@@ -295,25 +298,35 @@ void __fastcall CustomOcclusionQueryManager::UpdateLocalTransform(fb::Vec4* Loca
 
 bool CustomOcclusionQueryManager::IsInQuery( void* entity )
 {
+	this->Enter();
 	for (int i = 0; i < ARRAYSIZE(this->m_querys); i++)
 	{
 		CustomOcclusionQueryManager::OcclusionQuery* pOcclusionQuery = this->m_querys[i];
 		if (!ValidPointer(pOcclusionQuery)) continue;
 		if ( entity != NULL && pOcclusionQuery->m_entity == entity)
+		{
+			this->Leave();
 			return true;
+		}
 	}
+	this->Leave();
 	return false;
 }
 
 CustomOcclusionQueryManager::OcclusionQuery* CustomOcclusionQueryManager::GetQuery( void* entity )
 {
+	this->Enter();
 	for (int i = 0; i < ARRAYSIZE(this->m_querys); i++)
 	{
 		CustomOcclusionQueryManager::OcclusionQuery* pOcclusionQuery = this->m_querys[i];
 		if (!ValidPointer(pOcclusionQuery)) continue;
 		if ( entity != NULL && pOcclusionQuery->m_entity == entity)
+		{
+			this->Leave();
 			return pOcclusionQuery;
+		}
 	}
+	this->Leave();
 	return NULL;
 }
 
@@ -322,7 +335,7 @@ CustomOcclusionQueryManager::OcclusionQuery* CustomOcclusionQueryManager::AddQue
 	CustomOcclusionQueryManager::OcclusionQuery* oldQuery = this->GetQuery( entity );
 	if ( oldQuery != NULL )
 		return oldQuery;
-
+	this->Enter();
 	CustomOcclusionQueryManager::OcclusionQuery* pQuery = (CustomOcclusionQueryManager::OcclusionQuery*)malloc( sizeof(CustomOcclusionQueryManager::OcclusionQuery) );
 	ZeroMemory( pQuery, sizeof(CustomOcclusionQueryManager::OcclusionQuery) );
 
@@ -354,24 +367,42 @@ CustomOcclusionQueryManager::OcclusionQuery* CustomOcclusionQueryManager::AddQue
 	void* oriFnc = HookVTableFunction( (DWORD64**)entity, (BYTE*)&fb__ClientVehicleEntity__hkDestructor, 10 );
 	if ( fb__ClientVehicleEntity__Destructor == NULL )
 		 fb__ClientVehicleEntity__Destructor = (t_fb__ClientVehicleEntity__Destructor)oriFnc;
+	this->Leave();
 	return pQuery;
 }
 
 bool CustomOcclusionQueryManager::RemoveQuery( void* entity )
 {
+	this->Enter();
 	CustomOcclusionQueryManager::OcclusionQuery* pQuery = this->GetQuery( entity );
-	if (!ValidPointer(pQuery)) return false;
-
-	for (int i = 0; i < ARRAYSIZE(this->m_querys); i++)
+	if (ValidPointer(pQuery))
 	{
-		CustomOcclusionQueryManager::OcclusionQuery* pOcclusionQuery = this->m_querys[i];
-		if (!ValidPointer(pOcclusionQuery)) continue;
-		if ( pOcclusionQuery->m_entity == entity )
+		for (int i = 0; i < ARRAYSIZE(this->m_querys); i++)
 		{
-			this->m_querys[i] = NULL;
-			free( this->m_querys[i] );
-			return true;
+			CustomOcclusionQueryManager::OcclusionQuery* pOcclusionQuery = this->m_querys[i];
+			if (!ValidPointer(pOcclusionQuery)) continue;
+			if ( pOcclusionQuery->m_entity == entity )
+			{
+				free( this->m_querys[i] );
+				this->m_querys[i] = NULL;
+				this->Leave();
+				return true;
+			}
 		}
 	}
+	this->Leave();
 	return false;
+}
+
+void CustomOcclusionQueryManager::InitCriticalSection()
+{
+	InitializeCriticalSection(&this->m_CriticalSection);
+}
+void CustomOcclusionQueryManager::Enter()
+{
+	EnterCriticalSection(&this->m_CriticalSection);
+}
+void CustomOcclusionQueryManager::Leave()
+{
+	LeaveCriticalSection(&this->m_CriticalSection);
 }
