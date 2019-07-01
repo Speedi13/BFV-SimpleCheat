@@ -20,7 +20,12 @@ private:
 	fb::Vec4 LocalTransform;
 	float m_ObjectScreenAreaCoverage[32*8];
 	fb::WorldOcclusionQueryRenderModule::BatchQuery m_Batches[8];
+	CRITICAL_SECTION m_CriticalSection;
 public:
+	void CustomOcclusionQueryManager::InitCriticalSection();
+	void CustomOcclusionQueryManager::Enter();
+	void CustomOcclusionQueryManager::Leave();
+
 	void __fastcall CustomOcclusionQueryManager::UpdateLocalTransform(fb::Vec4*);
 	void __fastcall CustomOcclusionQueryManager::EngineUpdate();
 	void __fastcall CustomOcclusionQueryManager::hook();
@@ -36,6 +41,7 @@ public:
 		{
 			 g_CustomOcclusionQueryManager = (CustomOcclusionQueryManager*)malloc( sizeof(CustomOcclusionQueryManager) );
 			 ZeroMemory( g_CustomOcclusionQueryManager, sizeof(CustomOcclusionQueryManager) );
+			 g_CustomOcclusionQueryManager->InitCriticalSection();
 			 g_CustomOcclusionQueryManager->hook();
 		}
 		return g_CustomOcclusionQueryManager;
@@ -43,27 +49,27 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////// GAME FUNCTIONS //////////////////////////////////////////////////////////////////////////////////// 
-typedef void* 			 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)( 			fb::WorldOcclusionQueryRenderModule*, 
-																										QWORD v4, 
-																										void*, 
-																										fb::WorldOcclusionQueryRenderModule::BatchQuery* );
-																										
-typedef void* 			 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData)( 	fb::WorldOcclusionQueryRenderModule*, 
-																										fb::WorldOcclusionQueryRenderModule::BatchQuery*, 
-																										float flScreenArea );
-																										
-typedef unsigned __int64 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)( 		fb::WorldOcclusionQueryRenderModule*, 
-																										__int64 Arg2, 
-																										void*, 
-																										bool );
-																										
-typedef unsigned __int64 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery)( 		fb::WorldOcclusionQueryRenderModule*, 
-																										int _dwordC, 
-																										unsigned int QueryCount, 
-																										fb::WorldOcclusionQueryRenderModule::ObjectRenderInfo *ObjectRenderInfo, 
-																										float *outObjectScreenAreaCoverage );
+typedef void*            (__fastcall* t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)(           fb::WorldOcclusionQueryRenderModule*, 
+                                                                                                        QWORD v4, 
+                                                                                                        void*, 
+                                                                                                        fb::WorldOcclusionQueryRenderModule::BatchQuery* );
 
-extern t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery 			fb__WorldOcclusionQueryRenderModule__drawBatchQuery;
-extern t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData 		fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData;
-extern t_fb__WorldOcclusionQueryRenderModule__processBatchQueries 		fb__WorldOcclusionQueryRenderModule__processBatchQueries;
-extern t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery 			fb__WorldOcclusionQueryRenderModule__insertBatchQuery;
+typedef void*            (__fastcall* t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData)(   fb::WorldOcclusionQueryRenderModule*, 
+                                                                                                        fb::WorldOcclusionQueryRenderModule::BatchQuery*, 
+                                                                                                        float flScreenArea );
+
+typedef unsigned __int64 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)(      fb::WorldOcclusionQueryRenderModule*, 
+                                                                                                        __int64 Arg2, 
+                                                                                                        void*, 
+                                                                                                        bool );
+
+typedef unsigned __int64 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery)(         fb::WorldOcclusionQueryRenderModule*, 
+                                                                                                        int _dwordC, 
+                                                                                                        unsigned int QueryCount, 
+                                                                                                        fb::WorldOcclusionQueryRenderModule::ObjectRenderInfo *ObjectRenderInfo, 
+                                                                                                        float *outObjectScreenAreaCoverage );
+
+extern t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery            fb__WorldOcclusionQueryRenderModule__drawBatchQuery;
+extern t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData    fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData;
+extern t_fb__WorldOcclusionQueryRenderModule__processBatchQueries       fb__WorldOcclusionQueryRenderModule__processBatchQueries;
+extern t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery          fb__WorldOcclusionQueryRenderModule__insertBatchQuery;
