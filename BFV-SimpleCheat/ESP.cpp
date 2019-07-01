@@ -1,7 +1,9 @@
+
 #include "ESP.h"
 #include "Util.h"
 #include "ObfuscationMgr.h" //https://github.com/Speedi13/BFV-Decryption
 #include "CustomOcclusionQueryManager.h" //https://github.com/Speedi13/BFV-OcclusionQueryManager
+
 #include <math.h>
 #include <stdio.h>
 ESP* g_pESP = NULL;
@@ -35,6 +37,12 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 	fb::DebugRenderer2* pDbgRenderer = fb::DebugRenderer2::Singleton();
 	if (!ValidPointer(pDbgRenderer)) return;
 
+	fb::GameRenderer* pGameRenderer = fb::GameRenderer::GetInstance();
+	if (!ValidPointer(pGameRenderer)) return;
+
+	fb::RenderView* pRenderView = pGameRenderer->m_pRenderView;
+	if (!ValidPointer(pRenderView)) return;
+	
 	/*fb::ClientPlayer*/ this->m_pLocalPlayer = GetLocalPlayer();
 	if (!ValidPointer( this->m_pLocalPlayer )) return;
 
@@ -49,8 +57,10 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 	fb::LinearTransform LocalPlayerTransform;
 	this->m_pLocalSoldier->GetTransform( &LocalPlayerTransform );
 
+	CustomOcclusionQueryManager* COcclusionQuery = CustomOcclusionQueryManager::GetInstance();
+
 	fb::Vec4 vLocalPos = LocalPlayerTransform.trans;
-	CustomOcclusionQueryManager::GetInstance()->UpdateLocalTransform( &vLocalPos );
+	COcclusionQuery->UpdateLocalTransform( &vLocalPos );
 
 	//extracting the position:
 	fb::Vec4 vecLocalPosition = LocalPlayerTransform.trans;
@@ -94,25 +104,25 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 		float posl[4],posr[4];
 
 		//simple usage just as demo
-		RotatePointAlpha(posl, -0.5, 0, 1.8, 0, 0, 0, -anglex + 90);
+		RotatePointAlpha(posl, -0.5f, 0.0f, 1.8f, 0.0f, 0.0f, 0.0f, -anglex + 90.0f);
 
 /*
 		//proper usage
 		if (pSoldierEntity->m_poseType == 0)
 		{
-			RotatePointAlpha(posl, -0.5, 0, 1.8, 0, 0, 0, -anglex + 90);
+			RotatePointAlpha(posl, -0.5f, 0.0f, 1.8f, 0.0f, 0.0f, 0.0f, -anglex + 90.0f);
 		}
 		else if (pSoldierEntity->m_poseType == 1)
 		{
-			RotatePointAlpha(posl, -0.5, 0, 0.9, 0, 0, 0, -anglex + 90);
+			RotatePointAlpha(posl, -0.5f, 0.0f, 0.9f, 0.0f, 0.0f, 0.0f, -anglex + 90.0f);
 		}
 		else if (pSoldierEntity->m_poseType == 2)
 		{
-			RotatePointAlpha(posl, -0.5, 0, 0.4, 0, 0, 0, -anglex + 90);
+			RotatePointAlpha(posl, -0.5f, 0.0f, 0.4f, 0.0f, 0.0f, 0.0f, -anglex + 90.0f);
 		}
 */
 
-		RotatePointAlpha(posr, 0.5, 0, 0, 0, 0, 0, -anglex + 90);
+		RotatePointAlpha(posr, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -anglex + 90.0f);
 
 		fb::Vec4 vposl,vposr;
 
@@ -150,24 +160,26 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 					fb::LinearTransform_AABB TransformAABB = {};
 					pVehicle->GetTransformAABB( TransformAABB );
 
-					CustomOcclusionQueryManager::OcclusionQuery* pQuery = CustomOcclusionQueryManager::GetInstance()->GetQuery( pVehicle );
+					COcclusionQuery->Enter();
+					CustomOcclusionQueryManager::OcclusionQuery* pQuery = COcclusionQuery->GetQuery( pVehicle );
 					if (pQuery == NULL)
-						pQuery = CustomOcclusionQueryManager::GetInstance()->AddQuery( pVehicle, NULL );
+						pQuery = COcclusionQuery->AddQuery( pVehicle, NULL );
 
 					pQuery->UpdateQuery( &TransformAABB );
 
 					bool bVehicleVisible = pQuery->IsVisible();
+					COcclusionQuery->Leave();
 					TransformAABB.m_Transform.trans.y += 3;
 					fb::Vec4 VehicleScreenPos;
 					if ( this->ScreenProject( TransformAABB.m_Transform.trans, &VehicleScreenPos ) )
 					{
 						fb::Color32 VehicleColor = bVehicleVisible ? fb::Color32::Red() : fb::Color32::Yellow();
 
-						char text[500];
+						char text[512];
 						sprintf_s( text, "[%s]\nIsVisible = %u",pVehicleData->m_ControllableType,bVehicleVisible);
 
-						pDbgRenderer->drawText( VehicleScreenPos.x ,
-												VehicleScreenPos.y - 8,
+						pDbgRenderer->drawText( (int)VehicleScreenPos.x ,
+												(int)VehicleScreenPos.y - 8,
 												VehicleColor,
 												text,
 												1
@@ -177,8 +189,8 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 			}
 		}
 		//Draw the name of the Player:
-		pDbgRenderer->drawText( flSoldierPos_x ,
-								flSoldierPos_y + flSoldierPos_h + 6 ,
+		pDbgRenderer->drawText( (int)flSoldierPos_x ,
+								(int)flSoldierPos_y + (int)flSoldierPos_h + 6,
 								PlayerColor,
 								pPlayer->m_pName,
 								1
@@ -218,8 +230,8 @@ bool ESP::ScreenProject(fb::Vec4 WorldPos, fb::Vec4* ScreenPos)
 
 	fb::LinearTransform viewProj = pRenderView->m_ViewProj;
 
-	float mX = pScreenInfo->width * 0.5f;
-	float mY = pScreenInfo->height * 0.5f;
+	float mX = (float)pScreenInfo->width * 0.5f;
+	float mY = (float)pScreenInfo->height * 0.5f;
 
 	float w =
 		viewProj.right.w	* WorldPos.x +
