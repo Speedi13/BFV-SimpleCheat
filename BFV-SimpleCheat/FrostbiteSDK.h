@@ -4,26 +4,25 @@
 //for latest offsets check the last page of this thread:
 //https://www.unknowncheats.me/forum/battlefield-v/288137-battlefield-reversing-struct-offsets-thread.html
 
-#define OFFSET_CLIENTGAMECONTEXT 0x144449a50
-#define OFFSET_DXRENDERER 0x144496600
-#define OFFSET_GAMERENDERER 0x144497090
-#define OFFSET_ObfuscationMgr 0x14410D050
+#define OFFSET_CLIENTGAMECONTEXT 0x144A53220
+#define OFFSET_DXRENDERER 0x144AFFCD0
+#define OFFSET_GAMERENDERER 0x144AFFEA0
+extern void* OFFSET_ObfuscationMgr;
 
-#define OFFSET_DEBUGRENDERER     0x1453B4200 //48 8B 0D ?? ?? ?? ?? 48 85 C9 75 03 31 C0 C3 E9]
-#define OFFSET_DrawText          0x1403D2280 //4C 8B C8 44 8B C6 BA 14 00 00 00 49 8B CC E8] + 15
-#define OFFSET_DrawLine          0x1403D1D40 //49 8B CC E8 ?? ?? ?? ?? FF ?? 8B 0D] + 4
-#define OFFSET_DrawRect2D        0x1403D1F40 //C7 44 24 3C 00 00 F0 41 41 83 C9 FF 4C 8D] + 25
+#define OFFSET_DEBUGRENDERER     0x145E56900 //48 8B 0D ?? ?? ?? ?? 48 85 C9 75 03 31 C0 C3 E9]
+#define OFFSET_DrawText          0x14042D2D0 //4C 8B C8 44 8B C6 BA 14 00 00 00 49 8B CC E8] + 15
+#define OFFSET_DrawLine          0x145E59820 //49 8B CC E8 ?? ?? ?? ?? FF ?? 8B 0D] + 4
+#define OFFSET_DrawRect2D        0x145E59BE0 //C7 44 24 3C 00 00 F0 41 41 83 C9 FF 4C 8D] + 25
 
-#define ValidPointer( pointer ) ( pointer != NULL && (DWORD_PTR)pointer >= 0x10000 && (DWORD_PTR)pointer < 0x000F000000000000 /*&& some other checks*/ )
+#define ValidPointer( pointer ) ( pointer != NULL && (DWORD_PTR)pointer >= 0x10000 && (DWORD_PTR)pointer < 0x00007FFFFFFEFFFF /*&& some other checks*/ )
 
 extern DWORD OFFSET_Soldier;
 extern DWORD OFFSET_Vehicle;
 #define OFFSET_BoneCollisionComponent 0x0670
-#define OFFSET_HealthComponent 0x208+0x30
-#define OFFSET_occluded 0x91B
+#define OFFSET_HealthComponent 0x278
+#define OFFSET_occluded 0xA13
 #define OFFSET_PredictedController 0x800 //https://github.com/Speedi13/BFV-Decryption/blob/master/BfvDecryptionDemo/DllMain.cpp#L22
 #define OFFSET_Player_TeamId 0x1C48
-#define OFFSET_Soldier_TeamId 0x154+0x30
 
 #define D3DX_PI    (3.14159265358979323846)
 #define D3DX_1BYPI ( 1.0 / D3DX_PI )
@@ -31,6 +30,7 @@ extern DWORD OFFSET_Vehicle;
 #define D3DXToRadian( degree ) ((degree) * (D3DX_PI / 180.0))
 #define D3DXToDegree( radian ) ((radian) * (180.0 / D3DX_PI))
 
+#define ResolveRelativePtr(Address) ((ULONG_PTR)(Address) + *(__int32*)(Address) + sizeof(__int32))
 
 void* DecryptPointer( DWORD64 EncryptedPtr, DWORD64 PointerKey );
 
@@ -142,7 +142,7 @@ namespace fb
             return 0;
         }
 	};
-	template< typename T > class Tuple2;
+	
 	template <typename T>
 	class Tuple2
 	{
@@ -251,7 +251,8 @@ namespace fb
 		}
 	};
 
-	template< class T > class EncryptedPtr
+	template< class T >
+	class EncryptedPtr
 	{
 	public:
 		DWORD64 m_encryptedPtr;
@@ -271,9 +272,8 @@ namespace fb
 	struct Matrix4x4 { union {Vec4 v[4]; float m[4][4]; struct {Vec4 right;Vec4 up;Vec4 forward;Vec4 trans;}; }; };
 	typedef Matrix4x4 LinearTransform;
 
-	class AxisAlignedBox
+	struct AxisAlignedBox
 	{
-	public:
 		Vec4 min;
 		Vec4 max;
 	};
@@ -316,7 +316,7 @@ namespace fb
 		char _0x0000[72];
 		class GameRenderSettings* m_GameRenderSettings; //0x0048 
 		char _0x0050[16];
-		class RenderView* m_pRenderView;        // 0x60
+		RenderView* m_pRenderView;        // 0x60
 
 		static GameRenderer* GetInstance()
 		{
@@ -333,7 +333,6 @@ namespace fb
 		unsigned int height; //0x0004 
 		unsigned int windowWidth; //0x0008 
 		unsigned int windowHeight; //0x000C 
-
 	};//Size=0x0010
 
 	class SwapChainClass
@@ -343,27 +342,33 @@ namespace fb
 		class IDXGISwapChain* m_pSwapChain; //0x0010 
 	};//Size=0x0018
 
-
 	class Screen
 	{
 	public:
 		char _0x0000[0x68];
-		struct RenderScreenInfo m_ScreenInfo; //0x0068 
+		RenderScreenInfo m_ScreenInfo; //0x0068 
 		char _0x0078[0x288];
-		class SwapChainClass* m_ptrSwapChain; //0x0300
+		SwapChainClass* m_ptrSwapChain; //0x0300
 		char _0x0308[0x30];
 		class Dx11RenderTargetView * m_pDefaultRenderView; //0x0338 [=> https://www.unknowncheats.me/forum/1817135-post1239.html ]
 	};
-	class DxDisplaySettings
+	
+	enum RendererType
 	{
-	public:
-
+		RendererType_Dx9,	//=> 0
+		RendererType_Dx11,	//=> 1
+		RendererType_Dx12,	//=> 2
+		RendererType_Gl,	//=> 3
+		RendererType_Orbis,	//=> 4
+		RendererType_Mantle,//=> 5
+		RendererType_Balsa,	//=> 6
+		RendererType_Null	//=> 7
 	};
 	class DxRenderer
 	{
 	public:
 		virtual void Function0( );
-		virtual void Function1(); //
+		virtual RendererType fb::DxRenderer::getRendererType();
 		virtual void Function2(); //
 		virtual void Function3(); //
 		virtual void Function4(); //
@@ -374,10 +379,10 @@ namespace fb
 		virtual void endFrame(); // fb::DxRenderer::endFrame
 		virtual void acquireThreadOwnership(); //
 		virtual void releaseThreadOwnership(); //
-		virtual void Function12(); //
+		virtual void getAdapterInfo(); //
 		virtual unsigned int GetNumberOfScreens(); //
-		virtual struct RenderScreenInfo* getScreenInfo( unsigned int ScreenNbr ); //fb::DxRenderer::getScreenInfo;
-		class Screen* GetScreenByNumber( unsigned int ScreenNbr ){ return  (Screen*)( (DWORD_PTR)( (DWORD_PTR)this->getScreenInfo( ScreenNbr ) - (DWORD_PTR)0x68 ) ); }
+		virtual RenderScreenInfo* getScreenInfo( unsigned int ScreenNbr ); //fb::DxRenderer::getScreenInfo;
+		Screen* GetScreenByNumber( unsigned int ScreenNbr ){ return  (Screen*)( (DWORD_PTR)( (DWORD_PTR)this->getScreenInfo( ScreenNbr ) - (DWORD_PTR)0x68 ) ); }
 		virtual void Function15(); //
 		virtual void Function16(); //
 		virtual void Function17(); //
@@ -386,7 +391,7 @@ namespace fb
 		virtual void Function20(); //
 		virtual void Function21(); //
 		virtual void Function22(); //
-		virtual void Function23(); //
+		virtual void getFrameCounter(); //
 		virtual void Function24(); //
 		virtual void Function25(); //
 		virtual void Function26(); //
@@ -414,7 +419,7 @@ namespace fb
 		virtual void Function48(); //
 		virtual void Function49(); //
 		virtual void Function50(); //
-		virtual bool Function51(void); //
+		virtual bool Function51(); //
 		virtual void Function52(); //
 		virtual class DxDisplaySettings* getDxDisplaySettings(); //
 		virtual void Function54(); //
@@ -456,7 +461,7 @@ namespace fb
 		DWORD dword8; //0x0008
 		DWORD dwordC; //0x000C
 		QWORD qword10; //0x0010 pointer to the allocator i guess
-		fb::RenderQueryType m_type; //0x0018
+		RenderQueryType m_type; //0x0018
 		int m_dwQueryCount; //0x001C
 		class ID3D11Query** m_queries; //0x0020
 	};
@@ -541,7 +546,7 @@ namespace fb
 	class BoneCollisionComponent
 	{
 	public:
-		class UpdatePoseResultData m_ragdollTransforms; //0x0000
+		UpdatePoseResultData m_ragdollTransforms; //0x0000
 	};
 	class ClientSoldierPrediction
 	{
@@ -602,7 +607,7 @@ namespace fb
 	class ClientSoldierEntity
 	{
 	public:
-		virtual TypeInfo* GetType();
+		virtual class TypeInfo* GetType();
 		virtual void Function1(); //
 		virtual void Function2(); //
 		virtual void Function3(); //
@@ -674,7 +679,7 @@ namespace fb
 
 		void GetTransform( LinearTransform* OutMatrix )
 		{
-			DWORD_PTR m_collection = *(DWORD_PTR *)( (DWORD_PTR)this  + 0x38);
+			DWORD_PTR m_collection = *(DWORD_PTR *)( (DWORD_PTR)this  + 0x40);
 			unsigned __int8 _9 = *(unsigned __int8 *)(m_collection + 9);
 			unsigned __int8 _10 = *(unsigned __int8 *)(m_collection + 10);
 
@@ -702,16 +707,13 @@ namespace fb
 		{
 			return this->IsOccluded( ) == false;
 		}
-		int GetTeamId()
-		{
-			return *(int*)( (BYTE*)this + OFFSET_Soldier_TeamId );
-		}
 		bool GetBonePos( int BoneId, fb::Vec4 *vOut );
 	};
+	class VehicleEntityData;
 	class ClientVehicleEntity
 	{
 	public:
-		virtual TypeInfo* GetType();
+		virtual class TypeInfo* GetType();
 		virtual void Function1(); //
 		virtual void Function2(); //
 		virtual void Function3(); //
@@ -744,9 +746,9 @@ namespace fb
 			return *(HealthComponent**)( (BYTE*)this + OFFSET_HealthComponent );
 		};
 
-		class VehicleEntityData* GetEntityData()
+		VehicleEntityData* GetEntityData()
 		{
-			return *(class VehicleEntityData**)( (BYTE*)this + 0x30 );
+			return *(VehicleEntityData**)( (BYTE*)this + 0x38 );
 		};
 	};
 	class ClientPlayer
@@ -772,13 +774,6 @@ namespace fb
 			return *(int*)( (BYTE*)this + OFFSET_Player_TeamId );
 		}
 
-};
-
-
-	class ClientPlayerManager
-	{
-	public:
-
 	};
 
 	class WorldViewDesc
@@ -791,15 +786,15 @@ namespace fb
 	class WorldRenderer
 	{
 	public:
-		char _0x0000[2248];
-		class WorldOcclusionQueryRenderModule* m_WorldOcclusionQueriesRenderModule; //0x08C8 
-		char _0x08D0[2096];
+		char _0x0000[2248+0x18];
+		WorldOcclusionQueryRenderModule* m_WorldOcclusionQueriesRenderModule; //0x08E0 
+		char _0x08D0[2096-0x18];
 
 		class /*fb::WorldRenderer::*/RootView
 		{
 		public:
-			char _0x0000[3232];
-			WorldViewDesc m_rootView; //0x0CA0
+			char _0x0000[3232+0x10];
+			WorldViewDesc m_rootView; //0x0CB0
 		};
 
 		RootView m_rootviews; //0x1100 
@@ -808,8 +803,8 @@ namespace fb
 	class WorldRenderModule
 	{
 	public:
-		char _0x0000[56];
-		class WorldRenderer* m_worldRenderer; //0x0038 
+		char _0x0000[64];
+		WorldRenderer* m_worldRenderer; //0x0040
 	};
 
 	class ClientLevel
@@ -819,12 +814,12 @@ namespace fb
 		class LevelData* m_pLevelData; //0x0018 
 		class TeamInfo* m_pTeamInfo; //0x0020 
 		char* m_LevelName; //0x0028 
-		char _0x0030[200];
-		class WorldRenderModule* m_worldRenderModule; //0x00F8 
-		char _0x0100[8];
-		class HavokPhysicsManager* m_pPhysicsManager; //0x0108
-		char _0x0110[8];
-		class ClientGameWorld* m_pGameWorld; //0x0118 
+		char _0x0030[208];
+		WorldRenderModule* m_worldRenderModule; //0x0100
+		char _0x0108[8];
+		class HavokPhysicsManager* m_pPhysicsManager; //0x0110
+		char _0x0118[24];
+		class ClientGameWorld* m_pGameWorld; //0x0130
 	};
 
 	class ClientGameContext
@@ -848,7 +843,7 @@ namespace fb
 	public:
 		static DebugRenderer2* Singleton(void) 
 		{
-			typedef DebugRenderer2* (__stdcall* fb__DebugRenderManager_getThreadContext_t)(void);
+			typedef DebugRenderer2* (__thiscall* fb__DebugRenderManager_getThreadContext_t)(void);
 			fb__DebugRenderManager_getThreadContext_t fb__DebugRenderManager_getThreadContext=(fb__DebugRenderManager_getThreadContext_t)OFFSET_DEBUGRENDERER;
 			return fb__DebugRenderManager_getThreadContext();
 		}
@@ -905,296 +900,297 @@ namespace fb
 #endif
 
 	//[Characters/skeletons/3P_MaleSoldier_FB]
-    enum BoneIds
-    {
-    BONE_Reference = 0x0,
-    BONE_AITrajectory = 0x1,
-    BONE_Hips = 0x2,
-    BONE_Spine = 0x3,
-    BONE_Spine1 = 0x4,
-    BONE_Spine2 = 0x5,
-    BONE_Neck = 0x6,
-    BONE_Neck1 = 0x7,
-    BONE_Head = 0x8,
-    BONE_HeadEnd = 0x9,
-    BONE_FACIAL_C_FacialRoot = 0xA,
-    BONE_FACIAL_LOD1_C_Forehead = 0xB,
-    BONE_FACIAL_LOD1_L_ForeheadIn = 0xC,
-    BONE_FACIAL_LOD1_R_ForeheadIn = 0xD,
-    BONE_FACIAL_LOD1_L_ForeheadMid = 0xE,
-    BONE_FACIAL_LOD1_R_ForeheadMid = 0xF,
-    BONE_FACIAL_LOD1_L_ForeheadOut = 0x10,
-    BONE_FACIAL_LOD1_R_ForeheadOut = 0x11,
-    BONE_FACIAL_LOD1_L_EyesackUpper = 0x12,
-    BONE_FACIAL_LOD1_R_EyesackUpper = 0x13,
-    BONE_FACIAL_LOD1_L_EyelidUpperFurrow = 0x14,
-    BONE_FACIAL_LOD1_R_EyelidUpperFurrow = 0x15,
-    BONE_FACIAL_LOD1_L_EyelidUpper = 0x16,
-    BONE_FACIAL_LOD1_R_EyelidUpper = 0x17,
-    BONE_FACIAL_LOD1_L_Eyeball = 0x18,
-    BONE_FACIAL_LOD1_L_Pupil = 0x19,
-    BONE_FACIAL_LOD1_R_Eyeball = 0x1A,
-    BONE_FACIAL_LOD1_R_Pupil = 0x1B,
-    BONE_FACIAL_LOD1_L_EyelidLower = 0x1C,
-    BONE_FACIAL_LOD1_R_EyelidLower = 0x1D,
-    BONE_FACIAL_LOD1_L_EyesackLower = 0x1E,
-    BONE_FACIAL_LOD1_R_EyesackLower = 0x1F,
-    BONE_FACIAL_LOD1_L_CheekInner = 0x20,
-    BONE_FACIAL_LOD1_R_CheekInner = 0x21,
-    BONE_FACIAL_LOD1_L_CheekOuter = 0x22,
-    BONE_FACIAL_LOD1_R_CheekOuter = 0x23,
-    BONE_FACIAL_LOD1_C_NoseBridge = 0x24,
-    BONE_FACIAL_LOD1_L_NasolabialBulge = 0x25,
-    BONE_FACIAL_LOD1_R_NasolabialBulge = 0x26,
-    BONE_FACIAL_LOD1_L_NasolabialFurrow = 0x27,
-    BONE_FACIAL_LOD1_R_NasolabialFurrow = 0x28,
-    BONE_FACIAL_LOD1_L_CheekLower = 0x29,
-    BONE_FACIAL_LOD1_R_CheekLower = 0x2A,
-    BONE_FACIAL_LOD1_L_Ear = 0x2B,
-    BONE_FACIAL_LOD1_R_Ear = 0x2C,
-    BONE_FACIAL_LOD1_C_Nose = 0x2D,
-    BONE_FACIAL_LOD1_C_NoseLower = 0x2E,
-    BONE_FACIAL_LOD1_L_Nostril = 0x2F,
-    BONE_FACIAL_LOD1_R_Nostril = 0x30,
-    BONE_FACIAL_LOD1_C_Mouth = 0x31,
-    BONE_FACIAL_LOD1_C_LipUpper = 0x32,
-    BONE_FACIAL_LOD1_C_LipUpperInner = 0x33,
-    BONE_FACIAL_LOD1_L_LipUpper = 0x34,
-    BONE_FACIAL_LOD1_L_LipUpperInner = 0x35,
-    BONE_FACIAL_LOD1_R_LipUpper = 0x36,
-    BONE_FACIAL_LOD1_R_LipUpperInner = 0x37,
-    BONE_FACIAL_LOD1_L_LipUpperOuter = 0x38,
-    BONE_FACIAL_LOD1_L_LipUpperOuterInner = 0x39,
-    BONE_FACIAL_LOD1_R_LipUpperOuter = 0x3A,
-    BONE_FACIAL_LOD1_R_LipUpperOuterInner = 0x3B,
-    BONE_FACIAL_LOD1_L_LipCorner = 0x3C,
-    BONE_FACIAL_LOD1_L_LipCornerInner = 0x3D,
-    BONE_FACIAL_LOD1_R_LipCorner = 0x3E,
-    BONE_FACIAL_LOD1_R_LipCornerInner = 0x3F,
-    BONE_FACIAL_LOD1_C_LipLower = 0x40,
-    BONE_FACIAL_LOD1_C_LipLowerInner = 0x41,
-    BONE_FACIAL_LOD1_L_LipLower = 0x42,
-    BONE_FACIAL_LOD1_L_LipLowerInner = 0x43,
-    BONE_FACIAL_LOD1_R_LipLower = 0x44,
-    BONE_FACIAL_LOD1_R_LipLowerInner = 0x45,
-    BONE_FACIAL_LOD1_L_LipLowerOuter = 0x46,
-    BONE_FACIAL_LOD1_L_LipLowerOuterInner = 0x47,
-    BONE_FACIAL_LOD1_R_LipLowerOuter = 0x48,
-    BONE_FACIAL_LOD1_R_LipLowerOuterInner = 0x49,
-    BONE_FACIAL_LOD1_C_Jaw = 0x4A,
-    BONE_FACIAL_LOD1_C_Chin = 0x4B,
-    BONE_FACIAL_LOD1_L_ChinSide = 0x4C,
-    BONE_FACIAL_LOD1_R_ChinSide = 0x4D,
-    BONE_FACIAL_LOD1_C_Tongue1 = 0x4E,
-    BONE_FACIAL_LOD1_C_Tongue2 = 0x4F,
-    BONE_FACIAL_LOD1_C_Tongue3 = 0x50,
-    BONE_FACIAL_LOD1_C_Tongue4 = 0x51,
-    BONE_FACIAL_LOD1_L_Masseter = 0x52,
-    BONE_FACIAL_LOD1_R_Masseter = 0x53,
-    BONE_FACIAL_LOD1_C_UnderChin = 0x54,
-    BONE_FACIAL_LOD1_L_UnderChin = 0x55,
-    BONE_FACIAL_LOD1_R_UnderChin = 0x56,
-    BONE_Head_Prop = 0x57,
-    BONE_Head_Phys = 0x58,
-    BONE_FACIAL_C_Neck2Root = 0x59,
-    BONE_FACIAL_LOD1_C_AdamsApple = 0x5A,
-    BONE_HeadRoll = 0x5B,
-    BONE_Neck_Phys = 0x5C,
-    BONE_SpineX = 0x5D,
-    BONE_Wep_Aim = 0x5E,
-    BONE_SpineXRight = 0x5F,
-    BONE_RightShoulder = 0x60,
-    BONE_RightArm = 0x61,
-    BONE_RightForeArm = 0x62,
-    BONE_RightHand = 0x63,
-    BONE_RightHandAttach = 0x64,
-    BONE_RightHandIndex0 = 0x65,
-    BONE_RightHandIndex1 = 0x66,
-    BONE_RightHandIndex2 = 0x67,
-    BONE_RightHandIndex3 = 0x68,
-    BONE_RightHandIndex4 = 0x69,
-    BONE_RightHandMiddle0 = 0x6A,
-    BONE_RightHandMiddle1 = 0x6B,
-    BONE_RightHandMiddle2 = 0x6C,
-    BONE_RightHandMiddle3 = 0x6D,
-    BONE_RightHandMiddle4 = 0x6E,
-    BONE_RightHandThumb0 = 0x6F,
-    BONE_RightHandThumb1 = 0x70,
-    BONE_RightHandThumb2 = 0x71,
-    BONE_RightHandThumb3 = 0x72,
-    BONE_RightHandThumb4 = 0x73,
-    BONE_RightHandPinky0 = 0x74,
-    BONE_RightHandPinky1 = 0x75,
-    BONE_RightHandPinky2 = 0x76,
-    BONE_RightHandPinky3 = 0x77,
-    BONE_RightHandPinky4 = 0x78,
-    BONE_RightHandRing0 = 0x79,
-    BONE_RightHandRing1 = 0x7A,
-    BONE_RightHandRing2 = 0x7B,
-    BONE_RightHandRing3 = 0x7C,
-    BONE_RightHandRing4 = 0x7D,
-    BONE_RightForeArmRoll = 0x7E,
-    BONE_RightForeArmRoll1 = 0x7F,
-    BONE_RightForeArmRoll2 = 0x80,
-    BONE_RightForeArm_Upper = 0x81,
-    BONE_RightForeArm_Lower = 0x82,
-    BONE_RightElbowRoll = 0x83,
-    BONE_RightArmRoll = 0x84,
-    BONE_RightArmRoll1 = 0x85,
-    BONE_RightArmBend = 0x86,
-    BONE_RightShoulder_Phys = 0x87,
-    BONE_SpineXLeft = 0x88,
-    BONE_LeftShoulder = 0x89,
-    BONE_LeftArm = 0x8A,
-    BONE_LeftForeArm = 0x8B,
-    BONE_LeftHand = 0x8C,
-    BONE_LeftHandAttach = 0x8D,
-    BONE_LeftHandIndex0 = 0x8E,
-    BONE_LeftHandIndex1 = 0x8F,
-    BONE_LeftHandIndex2 = 0x90,
-    BONE_LeftHandIndex3 = 0x91,
-    BONE_LeftHandIndex4 = 0x92,
-    BONE_LeftHandMiddle0 = 0x93,
-    BONE_LeftHandMiddle1 = 0x94,
-    BONE_LeftHandMiddle2 = 0x95,
-    BONE_LeftHandMiddle3 = 0x96,
-    BONE_LeftHandMiddle4 = 0x97,
-    BONE_LeftHandThumb0 = 0x98,
-    BONE_LeftHandThumb1 = 0x99,
-    BONE_LeftHandThumb2 = 0x9A,
-    BONE_LeftHandThumb3 = 0x9B,
-    BONE_LeftHandThumb4 = 0x9C,
-    BONE_LeftHandPinky0 = 0x9D,
-    BONE_LeftHandPinky1 = 0x9E,
-    BONE_LeftHandPinky2 = 0x9F,
-    BONE_LeftHandPinky3 = 0xA0,
-    BONE_LeftHandPinky4 = 0xA1,
-    BONE_LeftHandRing0 = 0xA2,
-    BONE_LeftHandRing1 = 0xA3,
-    BONE_LeftHandRing2 = 0xA4,
-    BONE_LeftHandRing3 = 0xA5,
-    BONE_LeftHandRing4 = 0xA6,
-    BONE_LeftForeArmRoll = 0xA7,
-    BONE_LeftForeArmRoll1 = 0xA8,
-    BONE_LeftForeArmRoll2 = 0xA9,
-    BONE_LeftForeArm_Upper = 0xAA,
-    BONE_LeftForeArm_Lower = 0xAB,
-    BONE_LeftElbowRoll = 0xAC,
-    BONE_LeftArmRoll = 0xAD,
-    BONE_LeftArmRoll1 = 0xAE,
-    BONE_LeftArmBend = 0xAF,
-    BONE_LeftShoulder_Phys = 0xB0,
-    BONE_Wep_SpineX = 0xB1,
-    BONE_Wep_Root = 0xB2,
-    BONE_Wep_Align = 0xB3,
-    BONE_Wep_Trigger = 0xB4,
-    BONE_Wep_Slide = 0xB5,
-    BONE_Wep_Grenade1 = 0xB6,
-    BONE_Wep_Grenade2 = 0xB7,
-    BONE_IK_Joint_LeftHand = 0xB8,
-    BONE_IK_Joint_RightHand = 0xB9,
-    BONE_Wep_Physic1 = 0xBA,
-    BONE_Wep_Physic2 = 0xBB,
-    BONE_Wep_Physic3 = 0xBC,
-    BONE_Wep_Physic4 = 0xBD,
-    BONE_Wep_Physic5 = 0xBE,
-    BONE_Wep_Extra1 = 0xBF,
-    BONE_Wep_Extra2 = 0xC0,
-    BONE_Wep_Extra3 = 0xC1,
-    BONE_Wep_Extra4 = 0xC2,
-    BONE_Wep_Extra5 = 0xC3,
-    BONE_Wep_FX = 0xC4,
-    BONE_Wep_ButtStock = 0xC5,
-    BONE_IK_Dyn_LeftHand = 0xC6,
-    BONE_IK_Dyn_RightHand = 0xC7,
-    BONE_Wep_Belt1 = 0xC8,
-    BONE_Wep_Belt2 = 0xC9,
-    BONE_Wep_Belt3 = 0xCA,
-    BONE_Wep_Belt4 = 0xCB,
-    BONE_Wep_Belt5 = 0xCC,
-    BONE_Wep_Belt6 = 0xCD,
-    BONE_Wep_Belt7 = 0xCE,
-    BONE_Wep_Belt8 = 0xCF,
-    BONE_Wep_Belt9 = 0xD0,
-    BONE_Wep_Belt10 = 0xD1,
-    BONE_Wep_Mag = 0xD2,
-    BONE_Wep_Mag_Ammo = 0xD3,
-    BONE_Wep_Mag_Extra1 = 0xD4,
-    BONE_Wep_Scope1 = 0xD5,
-    BONE_Wep_Scope2 = 0xD6,
-    BONE_Wep_Bipod1 = 0xD7,
-    BONE_Wep_Bipod2 = 0xD8,
-    BONE_Wep_Bipod3 = 0xD9,
-    BONE_Wep_Belt_Out1 = 0xDA,
-    BONE_Wep_Belt_Out2 = 0xDB,
-    BONE_Wep_Belt_Out3 = 0xDC,
-    BONE_Wep_Belt_Out4 = 0xDD,
-    BONE_Wep_Belt_Out5 = 0xDE,
-    BONE_Wep_Belt_Out6 = 0xDF,
-    BONE_Wep_Belt_Out7 = 0xE0,
-    BONE_Wep_Belt_Out8 = 0xE1,
-    BONE_Wep_Belt_Out9 = 0xE2,
-    BONE_Wep_Belt_Out10 = 0xE3,
-    BONE_Spine2_Phys = 0xE4,
-    BONE_RightArmpit = 0xE5,
-    BONE_RightDeltoidBulge = 0xE6,
-    BONE_LeftArmpit = 0xE7,
-    BONE_LeftDeltoidBulge = 0xE8,
-    BONE_BackPackAnchor = 0xE9,
-    BONE_BackPackRoot = 0xEA,
-    BONE_BackPackPhys = 0xEB,
-    BONE_Spine1_Phys = 0xEC,
-    BONE_Spine_Phys = 0xED,
-    BONE_LeftUpLeg = 0xEE,
-    BONE_LeftKneeUp = 0xEF,
-    BONE_LeftUpLegRoll = 0xF0,
-    BONE_LeftUpLegRoll_Phys = 0xF1,
-    BONE_LeftKneeRoll = 0xF2,
-    BONE_LeftKneeUp_Phys = 0xF3,
-    BONE_LeftLeg = 0xF4,
-    BONE_LeftKneeLow = 0xF5,
-    BONE_LeftKneeLow_Phys = 0xF6,
-    BONE_LeftFoot = 0xF7,
-    BONE_LeftToeBase = 0xF8,
-    BONE_LeftToe = 0xF9,
-    BONE_LeftFootAttach = 0xFA,
-    BONE_LeftAnkle = 0xFB,
-    BONE_LeftHipsRoll = 0xFC,
-    BONE_RightUpLeg = 0xFD,
-    BONE_RightKneeUp = 0xFE,
-    BONE_RightUpLegRoll = 0xFF,
-    BONE_RightUpLegRoll_Phys = 0x100,
-    BONE_RightKneeRoll = 0x101,
-    BONE_RightKneeUp_Phys = 0x102,
-    BONE_RightLeg = 0x103,
-    BONE_RightKneeLow = 0x104,
-    BONE_RightKneeLow_Phys = 0x105,
-    BONE_RightFoot = 0x106,
-    BONE_RightToeBase = 0x107,
-    BONE_RightToe = 0x108,
-    BONE_RightFootAttach = 0x109,
-    BONE_RightAnkle = 0x10A,
-    BONE_RightHipsRoll = 0x10B,
-    BONE_Hips_Phys = 0x10C,
-    BONE_Trajectory = 0x10D,
-    BONE_TrajectoryEnd = 0x10E,
-    BONE_CameraBase = 0x10F,
-    BONE_CameraJoint = 0x110,
-    BONE_WepRootOffset = 0x111,
-    BONE_Connect = 0x112,
-    BONE_ConnectEnd = 0x113,
-    BONE_LeftFootPhaseEnd = 0x114,
-    BONE_RightFootPhaseEnd = 0x115,
-    BONE_RightAnkleEffectorAux = 0x116,
-    BONE_LeftAnkleEffectorAux = 0x117,
-    BONE_Wep_ProxyRoot = 0x118,
-    BONE_Wep_Proxy1 = 0x119,
-    BONE_Wep_Proxy2 = 0x11A,
-    BONE_Wep_ProxyExtra1 = 0x11B,
-    BONE_Wep_ProxyExtra2 = 0x11C,
-    BONE_SpineX_Driver = 0x11D,
-    BONE_FacePosesAnimation = 0x11E
-    };
+	enum BoneIds
+	{
+		BONE_Reference = 0x0,
+		BONE_AITrajectory = 0x1,
+		BONE_Hips = 0x2,
+		BONE_Spine = 0x3,
+		BONE_Spine1 = 0x4,
+		BONE_Spine2 = 0x5,
+		BONE_Neck = 0x6,
+		BONE_Neck1 = 0x7,
+		BONE_Head = 0x8,
+		BONE_HeadEnd = 0x9,
+		BONE_FACIAL_C_FacialRoot = 0xA,
+		BONE_FACIAL_LOD1_C_Forehead = 0xB,
+		BONE_FACIAL_LOD1_L_ForeheadIn = 0xC,
+		BONE_FACIAL_LOD1_R_ForeheadIn = 0xD,
+		BONE_FACIAL_LOD1_L_ForeheadMid = 0xE,
+		BONE_FACIAL_LOD1_R_ForeheadMid = 0xF,
+		BONE_FACIAL_LOD1_L_ForeheadOut = 0x10,
+		BONE_FACIAL_LOD1_R_ForeheadOut = 0x11,
+		BONE_FACIAL_LOD1_L_EyesackUpper = 0x12,
+		BONE_FACIAL_LOD1_R_EyesackUpper = 0x13,
+		BONE_FACIAL_LOD1_L_EyelidUpperFurrow = 0x14,
+		BONE_FACIAL_LOD1_R_EyelidUpperFurrow = 0x15,
+		BONE_FACIAL_LOD1_L_EyelidUpper = 0x16,
+		BONE_FACIAL_LOD1_R_EyelidUpper = 0x17,
+		BONE_FACIAL_LOD1_L_Eyeball = 0x18,
+		BONE_FACIAL_LOD1_L_Pupil = 0x19,
+		BONE_FACIAL_LOD1_R_Eyeball = 0x1A,
+		BONE_FACIAL_LOD1_R_Pupil = 0x1B,
+		BONE_FACIAL_LOD1_L_EyelidLower = 0x1C,
+		BONE_FACIAL_LOD1_R_EyelidLower = 0x1D,
+		BONE_FACIAL_LOD1_L_EyesackLower = 0x1E,
+		BONE_FACIAL_LOD1_R_EyesackLower = 0x1F,
+		BONE_FACIAL_LOD1_L_CheekInner = 0x20,
+		BONE_FACIAL_LOD1_R_CheekInner = 0x21,
+		BONE_FACIAL_LOD1_L_CheekOuter = 0x22,
+		BONE_FACIAL_LOD1_R_CheekOuter = 0x23,
+		BONE_FACIAL_LOD1_C_NoseBridge = 0x24,
+		BONE_FACIAL_LOD1_L_NasolabialBulge = 0x25,
+		BONE_FACIAL_LOD1_R_NasolabialBulge = 0x26,
+		BONE_FACIAL_LOD1_L_NasolabialFurrow = 0x27,
+		BONE_FACIAL_LOD1_R_NasolabialFurrow = 0x28,
+		BONE_FACIAL_LOD1_L_CheekLower = 0x29,
+		BONE_FACIAL_LOD1_R_CheekLower = 0x2A,
+		BONE_FACIAL_LOD1_L_Ear = 0x2B,
+		BONE_FACIAL_LOD1_R_Ear = 0x2C,
+		BONE_FACIAL_LOD1_C_Nose = 0x2D,
+		BONE_FACIAL_LOD1_C_NoseLower = 0x2E,
+		BONE_FACIAL_LOD1_L_Nostril = 0x2F,
+		BONE_FACIAL_LOD1_R_Nostril = 0x30,
+		BONE_FACIAL_LOD1_C_Mouth = 0x31,
+		BONE_FACIAL_LOD1_C_LipUpper = 0x32,
+		BONE_FACIAL_LOD1_C_LipUpperInner = 0x33,
+		BONE_FACIAL_LOD1_L_LipUpper = 0x34,
+		BONE_FACIAL_LOD1_L_LipUpperInner = 0x35,
+		BONE_FACIAL_LOD1_R_LipUpper = 0x36,
+		BONE_FACIAL_LOD1_R_LipUpperInner = 0x37,
+		BONE_FACIAL_LOD1_L_LipUpperOuter = 0x38,
+		BONE_FACIAL_LOD1_L_LipUpperOuterInner = 0x39,
+		BONE_FACIAL_LOD1_R_LipUpperOuter = 0x3A,
+		BONE_FACIAL_LOD1_R_LipUpperOuterInner = 0x3B,
+		BONE_FACIAL_LOD1_L_LipCorner = 0x3C,
+		BONE_FACIAL_LOD1_L_LipCornerInner = 0x3D,
+		BONE_FACIAL_LOD1_R_LipCorner = 0x3E,
+		BONE_FACIAL_LOD1_R_LipCornerInner = 0x3F,
+		BONE_FACIAL_LOD1_C_LipLower = 0x40,
+		BONE_FACIAL_LOD1_C_LipLowerInner = 0x41,
+		BONE_FACIAL_LOD1_L_LipLower = 0x42,
+		BONE_FACIAL_LOD1_L_LipLowerInner = 0x43,
+		BONE_FACIAL_LOD1_R_LipLower = 0x44,
+		BONE_FACIAL_LOD1_R_LipLowerInner = 0x45,
+		BONE_FACIAL_LOD1_L_LipLowerOuter = 0x46,
+		BONE_FACIAL_LOD1_L_LipLowerOuterInner = 0x47,
+		BONE_FACIAL_LOD1_R_LipLowerOuter = 0x48,
+		BONE_FACIAL_LOD1_R_LipLowerOuterInner = 0x49,
+		BONE_FACIAL_LOD1_C_Jaw = 0x4A,
+		BONE_FACIAL_LOD1_C_Chin = 0x4B,
+		BONE_FACIAL_LOD1_L_ChinSide = 0x4C,
+		BONE_FACIAL_LOD1_R_ChinSide = 0x4D,
+		BONE_FACIAL_LOD1_C_Tongue1 = 0x4E,
+		BONE_FACIAL_LOD1_C_Tongue2 = 0x4F,
+		BONE_FACIAL_LOD1_C_Tongue3 = 0x50,
+		BONE_FACIAL_LOD1_C_Tongue4 = 0x51,
+		BONE_FACIAL_LOD1_L_Masseter = 0x52,
+		BONE_FACIAL_LOD1_R_Masseter = 0x53,
+		BONE_FACIAL_LOD1_C_UnderChin = 0x54,
+		BONE_FACIAL_LOD1_L_UnderChin = 0x55,
+		BONE_FACIAL_LOD1_R_UnderChin = 0x56,
+		BONE_Head_Prop = 0x57,
+		BONE_Head_Phys = 0x58,
+		BONE_FACIAL_C_Neck2Root = 0x59,
+		BONE_FACIAL_LOD1_C_AdamsApple = 0x5A,
+		BONE_HeadRoll = 0x5B,
+		BONE_Neck_Phys = 0x5C,
+		BONE_SpineX = 0x5D,
+		BONE_Wep_Aim = 0x5E,
+		BONE_SpineXRight = 0x5F,
+		BONE_RightShoulder = 0x60,
+		BONE_RightArm = 0x61,
+		BONE_RightForeArm = 0x62,
+		BONE_RightHand = 0x63,
+		BONE_RightHandAttach = 0x64,
+		BONE_RightHandIndex0 = 0x65,
+		BONE_RightHandIndex1 = 0x66,
+		BONE_RightHandIndex2 = 0x67,
+		BONE_RightHandIndex3 = 0x68,
+		BONE_RightHandIndex4 = 0x69,
+		BONE_RightHandMiddle0 = 0x6A,
+		BONE_RightHandMiddle1 = 0x6B,
+		BONE_RightHandMiddle2 = 0x6C,
+		BONE_RightHandMiddle3 = 0x6D,
+		BONE_RightHandMiddle4 = 0x6E,
+		BONE_RightHandThumb0 = 0x6F,
+		BONE_RightHandThumb1 = 0x70,
+		BONE_RightHandThumb2 = 0x71,
+		BONE_RightHandThumb3 = 0x72,
+		BONE_RightHandThumb4 = 0x73,
+		BONE_RightHandPinky0 = 0x74,
+		BONE_RightHandPinky1 = 0x75,
+		BONE_RightHandPinky2 = 0x76,
+		BONE_RightHandPinky3 = 0x77,
+		BONE_RightHandPinky4 = 0x78,
+		BONE_RightHandRing0 = 0x79,
+		BONE_RightHandRing1 = 0x7A,
+		BONE_RightHandRing2 = 0x7B,
+		BONE_RightHandRing3 = 0x7C,
+		BONE_RightHandRing4 = 0x7D,
+		BONE_RightForeArmRoll = 0x7E,
+		BONE_RightForeArmRoll1 = 0x7F,
+		BONE_RightForeArmRoll2 = 0x80,
+		BONE_RightForeArm_Upper = 0x81,
+		BONE_RightForeArm_Lower = 0x82,
+		BONE_RightElbowRoll = 0x83,
+		BONE_RightArmRoll = 0x84,
+		BONE_RightArmRoll1 = 0x85,
+		BONE_RightArmBend = 0x86,
+		BONE_RightShoulder_Phys = 0x87,
+		BONE_SpineXLeft = 0x88,
+		BONE_LeftShoulder = 0x89,
+		BONE_LeftArm = 0x8A,
+		BONE_LeftForeArm = 0x8B,
+		BONE_LeftHand = 0x8C,
+		BONE_LeftHandAttach = 0x8D,
+		BONE_LeftHandIndex0 = 0x8E,
+		BONE_LeftHandIndex1 = 0x8F,
+		BONE_LeftHandIndex2 = 0x90,
+		BONE_LeftHandIndex3 = 0x91,
+		BONE_LeftHandIndex4 = 0x92,
+		BONE_LeftHandMiddle0 = 0x93,
+		BONE_LeftHandMiddle1 = 0x94,
+		BONE_LeftHandMiddle2 = 0x95,
+		BONE_LeftHandMiddle3 = 0x96,
+		BONE_LeftHandMiddle4 = 0x97,
+		BONE_LeftHandThumb0 = 0x98,
+		BONE_LeftHandThumb1 = 0x99,
+		BONE_LeftHandThumb2 = 0x9A,
+		BONE_LeftHandThumb3 = 0x9B,
+		BONE_LeftHandThumb4 = 0x9C,
+		BONE_LeftHandPinky0 = 0x9D,
+		BONE_LeftHandPinky1 = 0x9E,
+		BONE_LeftHandPinky2 = 0x9F,
+		BONE_LeftHandPinky3 = 0xA0,
+		BONE_LeftHandPinky4 = 0xA1,
+		BONE_LeftHandRing0 = 0xA2,
+		BONE_LeftHandRing1 = 0xA3,
+		BONE_LeftHandRing2 = 0xA4,
+		BONE_LeftHandRing3 = 0xA5,
+		BONE_LeftHandRing4 = 0xA6,
+		BONE_LeftForeArmRoll = 0xA7,
+		BONE_LeftForeArmRoll1 = 0xA8,
+		BONE_LeftForeArmRoll2 = 0xA9,
+		BONE_LeftForeArm_Upper = 0xAA,
+		BONE_LeftForeArm_Lower = 0xAB,
+		BONE_LeftElbowRoll = 0xAC,
+		BONE_LeftArmRoll = 0xAD,
+		BONE_LeftArmRoll1 = 0xAE,
+		BONE_LeftArmBend = 0xAF,
+		BONE_LeftShoulder_Phys = 0xB0,
+		BONE_Wep_SpineX = 0xB1,
+		BONE_Wep_Root = 0xB2,
+		BONE_Wep_Align = 0xB3,
+		BONE_Wep_Trigger = 0xB4,
+		BONE_Wep_Slide = 0xB5,
+		BONE_Wep_Grenade1 = 0xB6,
+		BONE_Wep_Grenade2 = 0xB7,
+		BONE_IK_Joint_LeftHand = 0xB8,
+		BONE_IK_Joint_RightHand = 0xB9,
+		BONE_Wep_Physic1 = 0xBA,
+		BONE_Wep_Physic2 = 0xBB,
+		BONE_Wep_Physic3 = 0xBC,
+		BONE_Wep_Physic4 = 0xBD,
+		BONE_Wep_Physic5 = 0xBE,
+		BONE_Wep_Extra1 = 0xBF,
+		BONE_Wep_Extra2 = 0xC0,
+		BONE_Wep_Extra3 = 0xC1,
+		BONE_Wep_Extra4 = 0xC2,
+		BONE_Wep_Extra5 = 0xC3,
+		BONE_Wep_FX = 0xC4,
+		BONE_Wep_ButtStock = 0xC5,
+		BONE_IK_Dyn_LeftHand = 0xC6,
+		BONE_IK_Dyn_RightHand = 0xC7,
+		BONE_Wep_Belt1 = 0xC8,
+		BONE_Wep_Belt2 = 0xC9,
+		BONE_Wep_Belt3 = 0xCA,
+		BONE_Wep_Belt4 = 0xCB,
+		BONE_Wep_Belt5 = 0xCC,
+		BONE_Wep_Belt6 = 0xCD,
+		BONE_Wep_Belt7 = 0xCE,
+		BONE_Wep_Belt8 = 0xCF,
+		BONE_Wep_Belt9 = 0xD0,
+		BONE_Wep_Belt10 = 0xD1,
+		BONE_Wep_Mag = 0xD2,
+		BONE_Wep_Mag_Ammo = 0xD3,
+		BONE_Wep_Mag_Extra1 = 0xD4,
+		BONE_Wep_Scope1 = 0xD5,
+		BONE_Wep_Scope2 = 0xD6,
+		BONE_Wep_Bipod1 = 0xD7,
+		BONE_Wep_Bipod2 = 0xD8,
+		BONE_Wep_Bipod3 = 0xD9,
+		BONE_Wep_Belt_Out1 = 0xDA,
+		BONE_Wep_Belt_Out2 = 0xDB,
+		BONE_Wep_Belt_Out3 = 0xDC,
+		BONE_Wep_Belt_Out4 = 0xDD,
+		BONE_Wep_Belt_Out5 = 0xDE,
+		BONE_Wep_Belt_Out6 = 0xDF,
+		BONE_Wep_Belt_Out7 = 0xE0,
+		BONE_Wep_Belt_Out8 = 0xE1,
+		BONE_Wep_Belt_Out9 = 0xE2,
+		BONE_Wep_Belt_Out10 = 0xE3,
+		BONE_Wep_Charm1 = 0xE4,
+		BONE_Spine2_Phys = 0xE5,
+		BONE_RightArmpit = 0xE6,
+		BONE_RightDeltoidBulge = 0xE7,
+		BONE_LeftArmpit = 0xE8,
+		BONE_LeftDeltoidBulge = 0xE9,
+		BONE_BackPackAnchor = 0xEA,
+		BONE_BackPackRoot = 0xEB,
+		BONE_BackPackPhys = 0xEC,
+		BONE_Spine1_Phys = 0xED,
+		BONE_Spine_Phys = 0xEE,
+		BONE_LeftUpLeg = 0xEF,
+		BONE_LeftKneeUp = 0xF0,
+		BONE_LeftUpLegRoll = 0xF1,
+		BONE_LeftUpLegRoll_Phys = 0xF2,
+		BONE_LeftKneeRoll = 0xF3,
+		BONE_LeftKneeUp_Phys = 0xF4,
+		BONE_LeftLeg = 0xF5,
+		BONE_LeftKneeLow = 0xF6,
+		BONE_LeftKneeLow_Phys = 0xF7,
+		BONE_LeftFoot = 0xF8,
+		BONE_LeftToeBase = 0xF9,
+		BONE_LeftToe = 0xFA,
+		BONE_LeftFootAttach = 0xFB,
+		BONE_LeftAnkle = 0xFC,
+		BONE_LeftHipsRoll = 0xFD,
+		BONE_RightUpLeg = 0xFE,
+		BONE_RightKneeUp = 0xFF,
+		BONE_RightUpLegRoll = 0x100,
+		BONE_RightUpLegRoll_Phys = 0x101,
+		BONE_RightKneeRoll = 0x102,
+		BONE_RightKneeUp_Phys = 0x103,
+		BONE_RightLeg = 0x104,
+		BONE_RightKneeLow = 0x105,
+		BONE_RightKneeLow_Phys = 0x106,
+		BONE_RightFoot = 0x107,
+		BONE_RightToeBase = 0x108,
+		BONE_RightToe = 0x109,
+		BONE_RightFootAttach = 0x10A,
+		BONE_RightAnkle = 0x10B,
+		BONE_RightHipsRoll = 0x10C,
+		BONE_Hips_Phys = 0x10D,
+		BONE_Trajectory = 0x10E,
+		BONE_TrajectoryEnd = 0x10F,
+		BONE_CameraBase = 0x110,
+		BONE_CameraJoint = 0x111,
+		BONE_WepRootOffset = 0x112,
+		BONE_Connect = 0x113,
+		BONE_ConnectEnd = 0x114,
+		BONE_LeftFootPhaseEnd = 0x115,
+		BONE_RightFootPhaseEnd = 0x116,
+		BONE_RightAnkleEffectorAux = 0x117,
+		BONE_LeftAnkleEffectorAux = 0x118,
+		BONE_Wep_ProxyRoot = 0x119,
+		BONE_Wep_Proxy1 = 0x11A,
+		BONE_Wep_Proxy2 = 0x11B,
+		BONE_Wep_ProxyExtra1 = 0x11C,
+		BONE_Wep_ProxyExtra2 = 0x11D,
+		BONE_SpineX_Driver = 0x11E,
+		BONE_FacePosesAnimation = 0x11F
+	};
 
 	struct VehicleLockableInfoData
 	{
@@ -1254,29 +1250,30 @@ namespace fb
 		char _0x0018[8];
 		LinearTransform m_Transform; //0x0020
 		Array<class GameObjectData*> m_Components; //0x0060
-		uint8_t m_ClientRuntimeComponentCount; //0x0068
-		uint8_t m_ServerRuntimeComponentCount; //0x0069
-		uint8_t m_ClientRuntimeTransformationCount; //0x006A
-		uint8_t m_ServerRuntimeTransformationCount; //0x006B
-		char _0x006C[4];
-		bool m_Enabled; //0x0070
-		char _0x0071[15];
-		class PhysicsEntityData* m_PhysicsData; //0x0080
-		bool m_IsTraversable; //0x0088
-		bool m_IsCharacterCollidable; //0x0089
-		char _0x008A[6];
-		uint32_t m_DefaultTeam; //0x0090
-		float m_LowHealthThreshold; //0x0094
-		uint32_t m_MaterialPair; //0x0098
-		char _0x009C[4];
-		Array<uint32_t> m_SuppressedInputs; //0x00A0
-		bool m_UsePrediction; //0x00A8
-		bool m_ShouldChangeTeamWhenPlayerEnters; //0x00A9
-		bool m_ResetTeamOnLastPlayerExits; //0x00AA
-		bool m_Immortal; //0x00AB
-		bool m_FakeImmortal; //0x00AC
-		bool m_ForceForegroundRendering; //0x00AD
-		char _0x00AE[2];
+		Array<AxisAlignedBox> m_PartBoundingBoxes; //0x0068
+		UINT8 m_ClientRuntimeComponentCount; //0x0070
+		UINT8 m_ServerRuntimeComponentCount; //0x0071
+		UINT8 m_ClientRuntimeTransformationCount; //0x0072
+		UINT8 m_ServerRuntimeTransformationCount; //0x0073
+		char _0x0074[12];
+		bool m_Enabled; //0x0080
+		char _0x0081[15];
+		class PhysicsEntityData* m_PhysicsData; //0x0090
+		bool m_IsTraversable; //0x0098
+		char _0x0099[7];
+		enum TeamId m_DefaultTeam; //0x00A0
+		float m_LowHealthThreshold; //0x00A4
+		int m_MaterialPair; //0x00A8
+		char _0x00AC[4];
+		Array<int> m_SuppressedInputs; //0x00B0
+		bool m_UsePrediction; //0x00B8
+		bool m_ShouldChangeTeamWhenPlayerEnters; //0x00B9
+		bool m_ResetTeamOnLastPlayerExits; //0x00BA
+		bool m_Immortal; //0x00BB
+		bool m_FakeImmortal; //0x00BC
+		bool m_ForceForegroundRendering; //0x00BD
+		bool m_IsNotSuspendable; //0x00BE
+		char _0x00BF[1];
 		Vec4 m_CriticallyDamagedEffectPosition; //0x00B0
 		Vec4 m_PreExplosionEffectPosition; //0x00C0
 		Vec4 m_VictimOffsetOverride; //0x00D0
@@ -1414,5 +1411,4 @@ namespace fb
 		char _0x0409[7];
 	};//Size=0x0410
 };
-
-fb::hashtable_iterator<_QWORD> *__fastcall hashtable_find(fb::hashtable<_QWORD>* table, fb::hashtable_iterator<_QWORD>* iterator, _QWORD key);
+fb::hashtable_iterator<_QWORD> *__fastcall hashtable_find( fb::hashtable<_QWORD>* table, fb::hashtable_iterator<_QWORD>* iterator, _QWORD key );
