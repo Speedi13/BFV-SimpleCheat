@@ -4,6 +4,7 @@
 #include "FrostbiteSDK.h"
 #include "Util.h"
 #include "ESP.h"
+#include "ObfuscationMgr.h"
 
 typedef DWORD64 (__fastcall* t_fb__DxRenderer__endFrame)( fb::DxRenderer*, DWORD64 a2, bool presentEnable );
 t_fb__DxRenderer__endFrame fb__DxRenderer__endFrame;
@@ -22,6 +23,17 @@ DWORD __stdcall SetupHook( HMODULE hOwnModule )
 	freopen("CONIN$", "r", stdin); 
 	freopen("CONOUT$", "w", stdout); 
 	freopen("CONOUT$", "w", stderr); 
+
+	SYSTEM_INFO info;
+	info.lpMaximumApplicationAddress = (void*)(~0);
+	info.lpMinimumApplicationAddress = (void*)( 0);
+	GetSystemInfo( &info );
+
+	if ( !ValidPointer(info.lpMinimumApplicationAddress) || !ValidPointer( (char*)info.lpMaximumApplicationAddress - 1 ) )
+	{
+		//https://docs.microsoft.com/en-us/windows-hardware/drivers/gettingstarted/virtual-address-spaces#user-space-and-system-space
+		printf("[!] virtual address space constants are wrong!\n");
+	}
 
 	fb::DxRenderer* pDxRenderer = fb::DxRenderer::GetInstance();
 	if (!ValidPointer(pDxRenderer))
@@ -43,6 +55,8 @@ DWORD __stdcall SetupHook( HMODULE hOwnModule )
 		printf("[!] Screen is invalid!\n");
 		return 1;
 	}
+	OFFSET_ObfuscationMgr = GetObfuscationMgr();
+	printf("[+] ObfuscationMgr: 0x%I64X\n",OFFSET_ObfuscationMgr);
 
 	g_pESP = new ESP();
 
