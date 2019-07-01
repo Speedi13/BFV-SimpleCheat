@@ -74,8 +74,7 @@ fb::hashtable_iterator<_QWORD> *__fastcall hashtable_find(fb::hashtable<_QWORD>*
 		while ( key != node->mValue.first )
 		{
 			node = node->mpNext;
-			if ( !node || !ValidPointer(node) 
-				)
+			if ( !node || !ValidPointer(node) )
 				goto LABEL_4;
 		}
 		iterator->mpNode = node;
