@@ -55,16 +55,16 @@ double Distance3D(fb::Vec4 *vec1 ,fb::Vec4 *vec2)
 //credits to Chevyyy
 float XAngle(float x1,float y1,float x2,float y2,float myangle)
 {
-	float dl=Distance2D( x1, y1 ,x2, y2 );                              
+	float dl=(float)Distance2D( x1, y1 ,x2, y2 );                              
 	if(dl==0)dl=1.0;                                                    
-	float dl2=abs(x2-x1);
-	float teta=((180.0/D3DX_PI)*acos(dl2/dl));                            
-	if(x2<x1)teta=180-teta;                                        
-	if(y2<y1)teta=teta*-1.0 ;
+	float dl2=(float)abs(x2-x1);
+	float teta=((float)(180.0/D3DX_PI)*(float)acos(dl2/dl));                            
+	if(x2<x1)teta=(float)(180-teta);                                        
+	if(y2<y1)teta=(float)(teta*-1.0);
 	teta=teta-myangle;
-	if(teta>180.0)teta=(360.0-teta)*(-1.0);
-	if(teta<-180.0)teta=(360.0+teta);                                        
-	return teta;
+	if(teta>180.0)teta=(float)((360.0-teta)*(-1.0));
+	if(teta<-180.0)teta=(float)((360.0+teta));                                        
+	return (float)teta;
 }
 
 
@@ -73,7 +73,7 @@ void RotatePointAlpha(float *outV, float x, float y, float z, float cx, float cy
 	//I don't want to include or link the DirectX SDK neither do I want to do it my self ^^
 	static HMODULE hD3dx9_43 = NULL;
 	if ( hD3dx9_43 == NULL )
-		 hD3dx9_43 = LoadLibraryA( "d3dx9_43.dll" );
+		 hD3dx9_43 = LoadLibraryW( L"d3dx9_43.dll" );
 
 	typedef fb::LinearTransform* (WINAPI* t_D3DXMatrixRotationY)( fb::LinearTransform *pOut, FLOAT Angle	);
 	static t_D3DXMatrixRotationY D3DXMatrixRotationY = NULL;
@@ -90,8 +90,8 @@ void RotatePointAlpha(float *outV, float x, float y, float z, float cx, float cy
 	vec.x=x-cx;
 	vec.z=y-cy;
 	vec.y=z-cz;
-	vec.w=1.0;
-	D3DXMatrixRotationY(&rot1,alpha*D3DX_PI/180.0);
+	vec.w=1.0f;
+	D3DXMatrixRotationY(&rot1,(FLOAT)(alpha*D3DX_PI/180.0));
 	D3DXVec4Transform(&vec,&vec,&rot1);
 	outV[0]=vec.x+cx;
 	outV[1]=vec.z+cy;
