@@ -146,8 +146,8 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 		float flSoldierPos_x = screenPosr.x;
 		float flSoldierPos_y = screenPosl.y;
 
-		float flSoldierPos_w = abs(screenPosr.x - screenPosl.x);
-		float flSoldierPos_h = abs(screenPosl.y - screenPosr.y);
+		float flSoldierPos_w = (float)abs( (float)(flSoldierPos_x - screenPosl.x) );
+		float flSoldierPos_h = (float)abs( (float)(flSoldierPos_y - screenPosr.y) );
 
 		if ( pPlayer->InVehicle() )
 		{
