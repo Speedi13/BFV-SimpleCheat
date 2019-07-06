@@ -35,21 +35,25 @@ void PlaceJmp( DWORD64 pAddr, DWORD64 pTarget )
 
 double Distance2D(float x1,float y1,float x2,float y2) 
 {
-	return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+	double value = (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
+	return sqrt( (double)value );
 }
 
 double Distance3D(float x1,float y1,float z1,float x2,float y2,float z2)
 {
-	return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
+	double value = (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1);
+	return sqrt( (double)value );
 }
 
 double Distance3D(fb::Vec4 *vec1 ,fb::Vec4 *vec2)
 {
-	return sqrt(	( vec2->x - vec1->x )*
-					( vec2->x - vec1->x )+( vec2->y - vec1->y )*
-					( vec2->y - vec1->y )+( vec2->z - vec1->z )*
-					( vec2->z - vec1->z )
-			  );
+	return sqrt(    (double)(
+                        ( vec2->x - vec1->x )*
+                        ( vec2->x - vec1->x )+( vec2->y - vec1->y )*
+                        ( vec2->y - vec1->y )+( vec2->z - vec1->z )*
+                        ( vec2->z - vec1->z )
+                        )
+                   );
 }
 
 //credits to Chevyyy
@@ -57,8 +61,8 @@ float XAngle(float x1,float y1,float x2,float y2,float myangle)
 {
 	float dl=(float)Distance2D( x1, y1 ,x2, y2 );                              
 	if(dl==0)dl=1.0;                                                    
-	float dl2=(float)abs(x2-x1);
-	float teta=((float)(180.0/D3DX_PI)*(float)acos(dl2/dl));                            
+	float dl2=(float)abs( (float)(x2-x1) );
+	float teta=((float)(180.0/D3DX_PI)*(float)acos( (float)(dl2/dl) ));                            
 	if(x2<x1)teta=(float)(180-teta);                                        
 	if(y2<y1)teta=(float)(teta*-1.0);
 	teta=teta-myangle;
