@@ -9,10 +9,10 @@
 #define OFFSET_GAMERENDERER 0x144AF2DC0
 extern void* OFFSET_ObfuscationMgr;
 
-#define OFFSET_DEBUGRENDERER     0x145DCE260 //48 8B 0D ?? ?? ?? ?? 48 85 C9 75 03 31 C0 C3 E9]
-#define OFFSET_DrawText          0x14042D690 //4C 8B C8 44 8B C6 BA 14 00 00 00 49 8B CC E8] + 15
-#define OFFSET_DrawLine          0x145DD0D10 //49 8B CC E8 ?? ?? ?? ?? FF ?? 8B 0D] + 4
-#define OFFSET_DrawRect2D        0x145DD10D0 //C7 44 24 3C 00 00 F0 41 41 83 C9 FF 4C 8D] + 25
+#define OFFSET_DEBUGRENDERER     0x146C38170 //48 8B 0D ?? ?? ?? ?? 48 85 C9 75 03 31 C0 C3 E9]
+#define OFFSET_DrawText          0x14042CF90 //4C 8B C8 44 8B C6 BA 14 00 00 00 49 8B CC E8] + 15
+#define OFFSET_DrawLine          0x146C3AFD0 //49 8B CC E8 ?? ?? ?? ?? FF ?? 8B 0D] + 4
+#define OFFSET_DrawRect2D        0x146C3B2A0 //C7 44 24 3C 00 00 F0 41 41 83 C9 FF 4C 8D] + 25
 
 #define ValidPointer( pointer ) ( pointer != NULL && (DWORD_PTR)pointer >= 0x10000 && (DWORD_PTR)pointer < 0x00007FFFFFFEFFFF /*&& some other checks*/ )
 
