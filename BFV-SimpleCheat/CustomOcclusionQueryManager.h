@@ -70,6 +70,8 @@ typedef unsigned __int64 (__fastcall* t_fb__WorldOcclusionQueryRenderModule__ins
                                                                                                         float *outObjectScreenAreaCoverage );
 
 extern t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery            fb__WorldOcclusionQueryRenderModule__drawBatchQuery;
-extern t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData    fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData;
+//extern t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData    fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData;
 extern t_fb__WorldOcclusionQueryRenderModule__processBatchQueries       fb__WorldOcclusionQueryRenderModule__processBatchQueries;
 extern t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery          fb__WorldOcclusionQueryRenderModule__insertBatchQuery;
+
+void __fastcall fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData( fb::WorldOcclusionQueryRenderModule *_this, fb::WorldOcclusionQueryRenderModule::BatchQuery* BatchQueries, float flScreenArea);
