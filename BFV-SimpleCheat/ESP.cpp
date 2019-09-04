@@ -176,7 +176,7 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 						fb::Color32 VehicleColor = bVehicleVisible ? fb::Color32::Red() : fb::Color32::Yellow();
 
 						char text[512];
-						sprintf_s( text, "[%s]\nIsVisible = %u",pVehicleData->m_ControllableType,bVehicleVisible);
+						sprintf_s( text, "[%s]\nIsVisible = %u",pVehicleData->m_ControllableType,bVehicleVisible&1);
 
 						pDbgRenderer->drawText( (int)VehicleScreenPos.x ,
 												(int)VehicleScreenPos.y - 8,
