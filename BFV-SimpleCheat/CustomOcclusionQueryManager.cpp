@@ -4,9 +4,9 @@
 #include <math.h>
 #include <stdio.h>
 
-t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery           fb__WorldOcclusionQueryRenderModule__drawBatchQuery =           (t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)         0x141A7CF90; //4C 8B ?? ?? 8B ?? 48 8B ?? 49 8B ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? CC
+t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery           fb__WorldOcclusionQueryRenderModule__drawBatchQuery =           (t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)         0x141A2C800; //4C 8B ?? ?? 8B ?? 48 8B ?? 49 8B ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? CC
 //t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData   fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData =   (t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData) 0x1419885C0; //got inlined
-t_fb__WorldOcclusionQueryRenderModule__processBatchQueries      fb__WorldOcclusionQueryRenderModule__processBatchQueries =      (t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)    0x141A9F530; //00 00 C6 44 ?? ?? ?? 41 B1 01 49 8B ?? E8
+t_fb__WorldOcclusionQueryRenderModule__processBatchQueries      fb__WorldOcclusionQueryRenderModule__processBatchQueries =      (t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)    0x141A4EDA0; //00 00 C6 44 ?? ?? ?? 41 B1 01 49 8B ?? E8
 t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery         fb__WorldOcclusionQueryRenderModule__insertBatchQuery =         (t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery)       0x?????????; //not needed
 
 
