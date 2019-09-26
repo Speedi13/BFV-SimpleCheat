@@ -4,15 +4,15 @@
 //for latest offsets check the last page of this thread:
 //https://www.unknowncheats.me/forum/battlefield-v/288137-battlefield-reversing-struct-offsets-thread.html
 
-#define OFFSET_CLIENTGAMECONTEXT 0x144722378
-#define OFFSET_DXRENDERER 0x1447CF588
-#define OFFSET_GAMERENDERER 0x1447CEB28
+#define OFFSET_CLIENTGAMECONTEXT 0x1446A44D8
+#define OFFSET_DXRENDERER        0x1447498B8
+#define OFFSET_GAMERENDERER      0x144748E58
 extern void* OFFSET_ObfuscationMgr;
 
-#define OFFSET_DEBUGRENDERER     0x1405E3930 //
-#define OFFSET_DrawText          0x1405E58F0 //
-#define OFFSET_DrawLine          0x1405E53D0 //
-#define OFFSET_DrawRect2D        0x145A8C9C0 //
+#define OFFSET_DEBUGRENDERER     0x1405D5630 //
+#define OFFSET_DrawText          0x1405D75F0 //
+#define OFFSET_DrawLine          0x1405D70D0 //
+#define OFFSET_DrawRect2D        0x14589E270 //
 
 #define ValidPointer( pointer ) ( pointer != NULL && (DWORD_PTR)pointer >= 0x10000 && (DWORD_PTR)pointer < 0x00007FFFFFFEFFFF /*&& some other checks*/ )
 
