@@ -12,7 +12,7 @@ extern void* OFFSET_ObfuscationMgr;
 #define OFFSET_DEBUGRENDERER     0x1405D5630 //
 #define OFFSET_DrawText          0x1405D75F0 //
 #define OFFSET_DrawLine          0x1405D70D0 //
-#define OFFSET_DrawRect2D        0x14589E270 //
+#define OFFSET_DrawRect2D        0x1458298A0 //
 
 #define ValidPointer( pointer ) ( pointer != NULL && (DWORD_PTR)pointer >= 0x10000 && (DWORD_PTR)pointer < 0x00007FFFFFFEFFFF /*&& some other checks*/ )
 
