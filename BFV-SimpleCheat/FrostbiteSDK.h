@@ -4,24 +4,24 @@
 //for latest offsets check the last page of this thread:
 //https://www.unknowncheats.me/forum/battlefield-v/288137-battlefield-reversing-struct-offsets-thread.html
 
-#define OFFSET_CLIENTGAMECONTEXT 0x1446A44D8
-#define OFFSET_DXRENDERER        0x1447498B8
-#define OFFSET_GAMERENDERER      0x144748E58
+#define OFFSET_CLIENTGAMECONTEXT 0x1446199F8
+#define OFFSET_DXRENDERER        0x1446C60D8
+#define OFFSET_GAMERENDERER      0x1446C5678
 extern void* OFFSET_ObfuscationMgr;
 
-#define OFFSET_DEBUGRENDERER     0x1405D5630 //
-#define OFFSET_DrawText          0x1405D75F0 //
-#define OFFSET_DrawLine          0x1405D70D0 //
-#define OFFSET_DrawRect2D        0x1458298A0 //
+#define OFFSET_DEBUGRENDERER     0x1405AE030 //
+#define OFFSET_DrawText          0x1405AFFF0 //
+#define OFFSET_DrawLine          0x1405AFAD0 //
+#define OFFSET_DrawRect2D        0x145A86840 //
 
 #define ValidPointer( pointer ) ( pointer != NULL && (DWORD_PTR)pointer >= 0x10000 && (DWORD_PTR)pointer < 0x00007FFFFFFEFFFF /*&& some other checks*/ )
 
 extern DWORD OFFSET_Soldier;
 extern DWORD OFFSET_Vehicle;
-#define OFFSET_BoneCollisionComponent 0x0670
-#define OFFSET_HealthComponent 0x280
-#define OFFSET_occluded 0xA13
-#define OFFSET_PredictedController 0x800 //https://github.com/Speedi13/BFV-Decryption/blob/master/BfvDecryptionDemo/DllMain.cpp#L22
+#define OFFSET_BoneCollisionComponent 0x0700
+#define OFFSET_HealthComponent 0x310
+#define OFFSET_occluded 0xA9B
+#define OFFSET_PredictedController 0x880 //https://github.com/Speedi13/BFV-Decryption/blob/master/BfvDecryptionDemo/DllMain.cpp#L22
 #define OFFSET_Player_TeamId 0x1C48
 
 #define D3DX_PI    (3.14159265358979323846)

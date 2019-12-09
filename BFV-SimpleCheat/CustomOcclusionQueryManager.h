@@ -27,7 +27,7 @@ public:
 	void CustomOcclusionQueryManager::Leave();
 
 	void __fastcall CustomOcclusionQueryManager::UpdateLocalTransform(fb::Vec4*);
-	void __fastcall CustomOcclusionQueryManager::EngineUpdate();
+	void __fastcall CustomOcclusionQueryManager::EngineUpdate( void* viewDesc );
 	void __fastcall CustomOcclusionQueryManager::hook();
 	bool CustomOcclusionQueryManager::IsInQuery( void* entity );
 	CustomOcclusionQueryManager::OcclusionQuery* CustomOcclusionQueryManager::GetQuery( void* entity );

@@ -4,15 +4,15 @@
 #include <math.h>
 #include <stdio.h>
 
-t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery           fb__WorldOcclusionQueryRenderModule__drawBatchQuery =           (t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)         0x141A2C800; //4C 8B ?? ?? 8B ?? 48 8B ?? 49 8B ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? CC
+t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery           fb__WorldOcclusionQueryRenderModule__drawBatchQuery =           (t_fb__WorldOcclusionQueryRenderModule__drawBatchQuery)         0x1419EDD60; //4C 8B ?? ?? 8B ?? 48 8B ?? 49 8B ?? E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? CC
 //t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData   fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData =   (t_fb__WorldOcclusionQueryRenderModule__retrieveBatchQueryData) 0x1419885C0; //got inlined
-t_fb__WorldOcclusionQueryRenderModule__processBatchQueries      fb__WorldOcclusionQueryRenderModule__processBatchQueries =      (t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)    0x141A4EDA0; //00 00 C6 44 ?? ?? ?? 41 B1 01 49 8B ?? E8
-t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery         fb__WorldOcclusionQueryRenderModule__insertBatchQuery =         (t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery)       0x?????????; //not needed
+t_fb__WorldOcclusionQueryRenderModule__processBatchQueries      fb__WorldOcclusionQueryRenderModule__processBatchQueries =      (t_fb__WorldOcclusionQueryRenderModule__processBatchQueries)    0x141A10300; //00 00 C6 44 ?? ?? ?? 41 B1 01 49 8B ?? E8
+t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery         fb__WorldOcclusionQueryRenderModule__insertBatchQuery =         (t_fb__WorldOcclusionQueryRenderModule__insertBatchQuery)       0;//0x?????????; //not needed
 
 
 unsigned __int64 __fastcall WorldOcclusionQueryRenderModule___HkProcessBatchQueries(fb::WorldOcclusionQueryRenderModule* _this, DWORD64 Qword, fb::WorldViewDesc* viewDesc, bool b )
 {
-    CustomOcclusionQueryManager::GetInstance()->EngineUpdate();
+    CustomOcclusionQueryManager::GetInstance()->EngineUpdate( viewDesc );
     return fb__WorldOcclusionQueryRenderModule__processBatchQueries( _this, Qword, viewDesc, b );
 }
 
@@ -37,6 +37,7 @@ void __fastcall CustomOcclusionQueryManager::hook()
 #if defined(_DEBUG_ENABLED) 
     printf(""__FUNCTION__"();\n");
 #endif
+	//return;//SSSSSSSSSKKKKIIIPPP for now!
     DWORD64 hookAddress = (DWORD64)fb__WorldOcclusionQueryRenderModule__processBatchQueries;
 /*
 //bytes that get overwritten by the hook:
@@ -63,7 +64,7 @@ void __fastcall CustomOcclusionQueryManager::hook()
     bHooked = true;
 }
 
-void __fastcall CustomOcclusionQueryManager::EngineUpdate()
+void __fastcall CustomOcclusionQueryManager::EngineUpdate( void* viewDesc )
 {
     //printf("function: "__FUNCTION__"\n");
     fb::DxRenderer* pDxRenderer = fb::DxRenderer::GetInstance();
@@ -87,13 +88,16 @@ void __fastcall CustomOcclusionQueryManager::EngineUpdate()
     fb::WorldOcclusionQueryRenderModule* pWorldOcclusionQueryRenderModule = pWorldRenderer->m_WorldOcclusionQueriesRenderModule;
     if (!ValidPointer(pWorldOcclusionQueryRenderModule)) return;
 
+	/*
     fb::WorldRenderer::RootView* RootView = &pWorldRenderer->m_rootviews;
     if (!ValidPointer(RootView)) return;
 
     fb::WorldViewDesc* RootViewDesc = &RootView->m_rootView; //same as viewDesc
     if (!ValidPointer(RootViewDesc)) return;
+	*/
+	fb::WorldViewDesc* RootViewDesc = (fb::WorldViewDesc*)viewDesc;
 
-    float flScreenArea = (float)RootView->m_rootView.viewport.width * RootView->m_rootView.viewport.height;
+    float flScreenArea = (float)RootViewDesc->viewport.width * RootViewDesc->viewport.height;
 
     //first xref of "waitMeshStream" function one of the first instructions of the function
     //48 8B 01 FF 50 38 C6 86 ?? ?? ?? 00 - after this pattern "mov r14, [rsi+12458h]"

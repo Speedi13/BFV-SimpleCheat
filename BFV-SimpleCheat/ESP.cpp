@@ -71,6 +71,7 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 	{
 		fb::ClientPlayer* pPlayer = GetPlayerById( i );
 		if (!ValidPointer( pPlayer )) continue;
+
 		//don't display players from the own team
 		if ( pPlayer->GetTeamId() == LocalTeamId ) continue;
 
@@ -159,7 +160,7 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 				{
 					fb::LinearTransform_AABB TransformAABB = {};
 					pVehicle->GetTransformAABB( TransformAABB );
-
+					
 					COcclusionQuery->Enter();
 					CustomOcclusionQueryManager::OcclusionQuery* pQuery = COcclusionQuery->GetQuery( pVehicle );
 					if (pQuery == NULL)
@@ -169,6 +170,7 @@ void ESP::Render( fb::DxRenderer* pDxRenderer )
 
 					bool bVehicleVisible = pQuery->IsVisible();
 					COcclusionQuery->Leave();
+
 					TransformAABB.m_Transform.trans.y += 3;
 					fb::Vec4 VehicleScreenPos;
 					if ( this->ScreenProject( TransformAABB.m_Transform.trans, &VehicleScreenPos ) )
